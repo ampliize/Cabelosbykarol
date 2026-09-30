@@ -6,7 +6,7 @@
 flowchart LR
     C([Cliente no WhatsApp]) <--> WA[WhatsApp do salão]
     WA <-->|extensão atual| BX[Extensão Belasis]
-    WA <-->|Cloud API coexistência<br/>ou Evolution API| AD
+    WA <-->|API não oficial<br/>aparelho vinculado| AD
 
     subgraph N8N[n8n]
         AD[channel_adapter] --> IN[Entrada:<br/>filtros, dedupe,<br/>humano assumiu?]
@@ -44,7 +44,7 @@ Princípios aplicados:
 - **Um agente só, poucas ferramentas** (skills *project-development* / *tool-design*): o problema é um diálogo com 6 ações bem definidas — não há ganho em multi-agente, só latência e custo.
 - **Determinístico em volta, LLM no meio**: filtros, buffer, contexto, guardas de escrita e envio são código; o LLM só conversa e escolhe ferramentas.
 - **Belasis é a fonte da verdade** para dados vivos (agenda, preços, histórico). Supabase guarda estado da conversa, KB e logs — nunca uma cópia da agenda.
-- **Canal isolado num adaptador**: trocar Cloud API ↔ Evolution API não mexe no agente.
+- **Canal isolado num adaptador**: migrar da API não oficial para a oficial no futuro não mexe no agente.
 
 ## 2. Sequência — "quero progressiva com a mesma profissional"
 
@@ -133,4 +133,4 @@ flowchart LR
 | Ambiente | Canal | Belasis | Uso |
 |---|---|---|---|
 | Homologação | Evolution API com número de teste | Credencial de homologação / unidade teste | Desenvolvimento e suíte de avaliação |
-| Produção | Número do salão (Cloud API coexistência ou Evolution) | Produção | Go-live 08/10 com monitoramento |
+| Produção | Número do salão via API não oficial (regras anti-ban TRD §2.1) | Produção | Go-live 08/10 com monitoramento |

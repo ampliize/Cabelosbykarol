@@ -13,4 +13,4 @@ Go-live alvo: **08/10/2026**.
 
 ## Stack
 
-n8n · Claude (Anthropic) · Supabase · API Belasis · WhatsApp (Cloud API coexistência ou Evolution API)
+n8n · Claude (Anthropic) · Supabase · API Belasis · WhatsApp (API não oficial, uso responsável — ver TRD §2.1)

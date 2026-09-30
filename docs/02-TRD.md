@@ -18,17 +18,28 @@ Complementa o [PRD](01-PRD.md). Arquitetura visual em [03-ARQUITETURA.md](03-ARQ
 | Sistema de gestão | **API Belasis** | Fonte da verdade de clientes, agenda, serviços |
 | Painel (fase 2) | Lovable + Supabase | Editor de KB e métricas |
 
-## 2. Decisão de canal WhatsApp (decidir até 01/10)
+## 2. Canal WhatsApp — DECIDIDO: API não oficial (Evolution API / WhatsApp Web)
 
-Restrição central: **o Belasis já usa uma extensão ligada ao WhatsApp do salão**. O bot não pode quebrar isso.
+Decisão (30/09): usar **API não oficial** conectada como *aparelho vinculado* do número atual do salão. Ela convive com a extensão Belasis (que também é um aparelho vinculado) sem migrar o número. A API já está disponível, mas **só será conectada ao número de produção no piloto (07/10)**. Até lá, desenvolvimento em número de teste.
 
-| Opção | Como funciona | Prós | Contras |
-|---|---|---|---|
-| **A. Cloud API oficial (Meta) em modo coexistência** ✅ recomendada | Número continua no app WhatsApp Business **e** fica conectado à Cloud API ao mesmo tempo | Oficial (sem risco de ban), webhooks estáveis, mensagens do app aparecem como "echo" (detecta humano assumindo) | Onboarding via BSP/Meta (1–3 dias), templates pagos para mensagens fora da janela de 24 h, precisa confirmar se a extensão Belasis continua funcionando com o número em coexistência |
-| **B. Evolution API (WhatsApp Web / Baileys)** | Conecta como mais um "aparelho vinculado" do número | Setup em horas, convive com WhatsApp Web + extensão (é só mais um dispositivo), sem custo por mensagem | Não oficial → risco de banimento; sessão pode cair; depende de manutenção |
-| C. Número novo só para o bot | Separado do número atual | Zero conflito | Clientes já têm o número atual salvo — pior experiência |
+O n8n fica atrás de um `channel_adapter` (sub-workflow) que normaliza as mensagens — se um dia migrarmos para a Cloud API oficial, muda só o adaptador.
 
-**Recomendação:** iniciar o onboarding da **opção A** no dia 01/10 e, em paralelo, subir a **opção B** em homologação para não travar o desenvolvimento. O n8n fica atrás de uma camada `channel_adapter` (sub-workflow) que normaliza as mensagens — trocar de A para B (ou vice-versa) muda só esse adaptador.
+### 2.1 Regras de uso responsável (anti-banimento)
+
+O risco de banimento vem de comportamento de robô/spam. Regras obrigatórias, implementadas no `WA · Enviar mensagem` e em `config_bot`:
+
+| # | Regra | Implementação |
+|---|---|---|
+| R1 | **Só responder**, nunca iniciar conversa no MVP | Envio bloqueado se não houver mensagem recebida da cliente nas últimas 24 h |
+| R2 | Sem disparo em massa, sem mensagens idênticas em série | Nenhum workflow de broadcast; lembretes (fase 2) só para quem tem agendamento, com limite diário e texto variado |
+| R3 | Comportamento humano no envio | Marcar como lida → presença "digitando" → delay proporcional ao tamanho (≈ 40 ms/caractere, mín. 2 s, máx. 8 s, com jitter aleatório) |
+| R4 | Limite de vazão | Máx. 1 mensagem a cada 3 s por número e ~20/min no total; fila no Supabase se exceder |
+| R5 | Mensagens curtas e poucas | Máx. 3 blocos por resposta; nada de links na primeira resposta a um número novo |
+| R6 | Sessão estável | Uma única instância, servidor/IP fixo, sem reconectar em loop; celular do salão ligado e com internet (aparelho vinculado cai após ~14 dias sem o celular online) |
+| R7 | Respeitar aparelhos vinculados | Limite de 4 aparelhos: extensão Belasis + API + reserva. Ninguém desconecta a API pelo celular |
+| R8 | Monitoramento e kill switch | Alerta imediato em desconexão/QR pedido/erro de envio; flag `bot_ativo` em `config_bot` desliga todo envio na hora |
+| R9 | Ignorar grupos, status, listas de transmissão e números da equipe | Filtro no `WA · Entrada` |
+| R10 | Opt-out | Cliente que pedir "não quero falar com robô" → handoff e bot desativado para aquele número |
 
 ### Formato normalizado de mensagem (contrato do adapter)
 

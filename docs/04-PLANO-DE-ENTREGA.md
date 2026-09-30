@@ -5,7 +5,7 @@
 | Dia | Entregas | Critério de pronto |
 |---|---|---|
 | **Qua 30/09** | PRD, TRD, arquitetura (este repo). Enviar ao cliente a lista de pendências abaixo | Docs revisados pela Ampliize |
-| **Qui 01/10** | Validar API Belasis (todos os endpoints do TRD §8 via Postman/n8n). Decidir canal (TRD §2) e iniciar onboarding. Subir Supabase (schema TRD §7) e Evolution de homologação | Planilha de endpoints ✅/❌; decisão de canal registrada |
+| **Qui 01/10** | Validar API Belasis (todos os endpoints do TRD §8 via Postman/n8n). Subir Supabase (schema TRD §7) e instância da API WhatsApp com **número de teste** | Planilha de endpoints ✅/❌; mensagem de teste chegando no n8n |
 | **Sex 02/10** | `WA · Entrada`, `WA · Enviar`, buffer, dedupe, humano assumiu. Rodar pipeline de KB com o export do WhatsApp | Mensagem de teste ida e volta; KB rascunho gerada |
 | **Sáb 03 – Dom 04/10** | Sub-workflows Belasis (cliente, serviços, horários, agendar, alterar). `Agente · Core` com prompt v1 | Caso "mesma profissional" funcionando ponta a ponta em homologação |
 | **Seg 05/10** | Handoff, áudio/imagem, contingências, Error Workflow. Revisão da KB e tom de voz com a Karol | KB aprovada; todos os casos obrigatórios (TRD §9) rodando |
@@ -31,7 +31,7 @@ Plano B (se a API Belasis não expuser disponibilidade/agendamento até 01/10): 
 
 | # | Decisão | Recomendação | Dono |
 |---|---|---|---|
-| 1 | Canal: Cloud API coexistência × Evolution API | Cloud API coexistência (se extensão Belasis continuar funcionando); Evolution para homologação | Ampliize + cliente |
+| 1 | ~~Canal~~ | ✅ Decidido: API não oficial com regras anti-ban (TRD §2.1); número real só no piloto 07/10 | — |
 | 2 | Bot agenda direto ou só pré-agenda para a recepção confirmar? | Agenda direto com confirmação da cliente | Karol |
 | 3 | Horas de pausa quando humano assume | 4 h | Karol |
 | 4 | Bot atende fora do horário comercial? | Sim, agenda e avisa que humanos respondem no próximo expediente | Karol |

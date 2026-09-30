@@ -122,7 +122,7 @@ Extraído do histórico real do WhatsApp do salão (ver TRD §4). Diretrizes ini
 | # | Item | Status |
 |---|---|---|
 | D1 | Documentação e credenciais da **API Belasis** (endpoints de cliente, histórico, profissionais, serviços, disponibilidade, agendamento) | ✅ temos a API — **enviar docs/credenciais de homologação** |
-| D2 | Como o Belasis se conecta ao WhatsApp hoje (extensão no WhatsApp Web) — precisa continuar funcionando | ⚠️ definir canal (ver TRD §2) |
+| D2 | Canal WhatsApp | ✅ API não oficial como aparelho vinculado (convive com a extensão Belasis) — conectar ao número real só no piloto |
 | D3 | **Exportação do histórico do WhatsApp** do salão (conversas de 3–6 meses) | ⏳ pedir ao cliente |
 | D4 | Políticas do salão (cancelamento, atraso, sinal, formas de pagamento, endereço, horários) | ⏳ pedir ao cliente |
 | D5 | Lista de números da equipe (para ignorar/detectar "humano assumiu") | ⏳ pedir ao cliente |
@@ -133,7 +133,7 @@ Extraído do histórico real do WhatsApp do salão (ver TRD §4). Diretrizes ini
 | Risco | Impacto | Mitigação |
 |---|---|---|
 | API Belasis não expõe disponibilidade/agendamento | Bloqueia F4–F6 | Validar endpoints no dia 01/10. Plano B: bot coleta preferência e transfere para humano agendar (MVP ainda entrega F1–F3, F7) |
-| Conflito entre o bot e a extensão Belasis no mesmo número | Mensagens duplicadas / sessão derrubada | Decisão de canal no dia 01/10 (TRD §2) e teste de convivência |
-| Banimento do número (API não oficial) | Salão sem WhatsApp | Preferir API oficial (Cloud API em modo coexistência); se não oficial, volumes baixos e sem disparos em massa |
+| Conflito entre o bot e a extensão Belasis no mesmo número | Mensagens duplicadas / sessão derrubada | Teste de convivência no piloto (07/10) antes de liberar para todos |
+| Banimento do número (API não oficial — decisão tomada) | Salão sem WhatsApp | Regras anti-ban do TRD §2.1: só responder, sem massa, delays humanos, limite de vazão, kill switch |
 | Alucinação de preço/horário | Perda de confiança | Regras §6 no prompt + dados só via ferramentas + confirmação obrigatória + suíte de avaliação |
 | Prazo curto (6 dias úteis) | Entrega parcial | Escopo P0 enxuto, fase 2 separada, go-live com monitoramento humano nos 3 primeiros dias |
