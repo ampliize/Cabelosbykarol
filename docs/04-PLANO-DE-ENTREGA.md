@@ -5,7 +5,7 @@
 | Dia | Entregas | Critério de pronto |
 |---|---|---|
 | **Qua 30/09** | PRD, TRD, arquitetura (este repo). Enviar ao cliente a lista de pendências abaixo | Docs revisados pela Ampliize |
-| **Qui 01/10** | ✅ Documentação da API Belasis analisada ([05-BELASIS-API.md](05-BELASIS-API.md)). Rodar `scripts/belasis-smoke.sh` com a chave real. Subir Supabase (schema TRD §7) e instância da API WhatsApp com **número de teste** | Planilha de endpoints ✅/❌; mensagem de teste chegando no n8n |
+| **Qui 01/10** | ✅ Documentação da API Belasis analisada ([05-BELASIS-API.md](05-BELASIS-API.md)). Rodar `scripts/belasis-smoke.sh` com a chave real. ✅ Supabase criado (schema + funções + testes). Subir instância da API WhatsApp com **número de teste** | Planilha de endpoints ✅/❌; mensagem de teste chegando no n8n |
 | **Sex 02/10** | `WA · Entrada`, `WA · Enviar`, buffer, dedupe, humano assumiu. Rodar pipeline de KB com o export do WhatsApp | Mensagem de teste ida e volta; KB rascunho gerada |
 | **Sáb 03 – Dom 04/10** | Sub-workflows Belasis (cliente, serviços, horários, agendar, alterar). `Agente · Core` com prompt v1 | Caso "mesma profissional" funcionando ponta a ponta em homologação |
 | **Seg 05/10** | Handoff, áudio/imagem, contingências, Error Workflow. Revisão da KB e tom de voz com a Karol | KB aprovada; todos os casos obrigatórios (TRD §9) rodando |
