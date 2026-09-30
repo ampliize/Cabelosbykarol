@@ -106,7 +106,7 @@ Princípios (skill *tool-design*): poucas ferramentas, sem sobreposição, nome 
 | Ferramenta | Faz | Parâmetros do agente (`$fromAI`) | Parâmetros plumbados |
 |---|---|---|---|
 | `buscar_servicos` | Lista serviços com duração, preço/faixa e profissionais que fazem | `termo` (ex.: "progressiva") | — |
-| `consultar_horarios` | Horários livres para um serviço, opcionalmente com profissional, em um período | `servico_id`, `profissional_id?`, `data_inicio`, `data_fim?` (padrão +14 dias), `turno?` (manha/tarde/noite) | `unidade_id` |
+| `consultar_horarios` | Horários livres para um serviço, opcionalmente com profissional, em um período | `servico_id`, `profissional_id?`, `data_inicio`, `data_fim?` (padrão +14 dias), `turno?` (manha/tarde/noite) | — |
 | `agendar_horario` | Cria agendamento no Belasis | `servico_id`, `profissional_id`, `inicio` (ISO), `confirmacao_cliente` (texto literal do "sim") | `cliente_id`, `telefone`, `conversa_id` |
 | `alterar_agendamento` | Remarca ou cancela agendamento futuro **da própria cliente** | `agendamento_id`, `acao` (remarcar/cancelar), `novo_inicio?`, `confirmacao_cliente` | `cliente_id` |
 | `consultar_base_conhecimento` | Busca FAQ/políticas aprovadas | `pergunta` | — |
@@ -245,24 +245,17 @@ RLS habilitado em todas as tabelas; acesso só via service role do n8n (e, na fa
 
 Base de conhecimento: no MVP com poucas dezenas de itens, `consultar_base_conhecimento` pode simplesmente retornar todos os itens aprovados da categoria (sem vetor). pgvector entra só se a base passar de ~100 itens.
 
-## 8. Contrato necessário da API Belasis (validar em 01/10)
+## 8. API Belasis — validada contra a documentação oficial
 
-| Necessidade | Endpoint esperado | Usado em |
-|---|---|---|
-| Buscar cliente por telefone | `GET /clientes?telefone=` | Contexto |
-| Histórico de atendimentos da cliente | `GET /clientes/{id}/atendimentos` | Contexto (F3) |
-| Próximos agendamentos da cliente | `GET /agendamentos?cliente_id=&de=hoje` | Contexto, F6 |
-| Listar serviços (preço, duração) | `GET /servicos` | `buscar_servicos` |
-| Profissionais e serviços que executam | `GET /profissionais` | `buscar_servicos`, `consultar_horarios` |
-| Disponibilidade | `GET /agenda/disponibilidade?servico=&profissional=&de=&ate=` | `consultar_horarios` |
-| Criar agendamento | `POST /agendamentos` | `agendar_horario` |
-| Remarcar / cancelar | `PATCH` / `DELETE /agendamentos/{id}` | `alterar_agendamento` |
-| Criar cliente | `POST /clientes` | Cliente nova |
-| Webhooks (opcional) | agendamento criado/alterado | Invalidar cache, lembretes (fase 2) |
+Mapeamento completo, limites e decisões em **[05-BELASIS-API.md](05-BELASIS-API.md)**. Resumo do que muda neste TRD:
 
-Para cada endpoint registrar: autenticação, formato de telefone (com/sem 55/9º dígito), fuso horário, paginação, rate limit, códigos de erro. **Se disponibilidade não existir pronta**, calcular no sub-workflow: expediente da profissional − agendamentos existentes − duração do serviço.
-
-Normalização de telefone: armazenar sempre E.164 sem `+` (`5511999998888`) e tentar variações com/sem 9º dígito na busca.
+- Todos os endpoints necessários existem (cliente, histórico via `schedule_groups`, serviços, profissionais, `free_times`, criar/cancelar agendamento). **Plano B não é necessário.**
+- **Rate limit de 30 req/min** → todas as chamadas passam pelo sub-workflow `Belasis · Request` (limitador + cache + retry em 429).
+- Busca de cliente é textual (`search`), não exata → match de telefone feito no n8n.
+- `free_times` é por profissional e por dia e não considera a duração → busca dia a dia até 3 opções e checagem de slots consecutivos.
+- Remarcar = criar novo + cancelar antigo.
+- `available_to_online_scheduling` define quais serviços o bot pode agendar sozinho.
+- Sem webhooks → revalidar horário antes de gravar.
 
 ## 9. Qualidade e avaliação
 

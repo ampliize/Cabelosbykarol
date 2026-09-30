@@ -1,0 +1,2987 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Belasis API",
+    "version": "v1",
+    "description": "Consolidado a partir de https://belasis-api.readme.io (export de 30/09/2026)"
+  },
+  "servers": [
+    {
+      "url": "https://api.belasis.com.br"
+    }
+  ],
+  "paths": {
+    "/api/v1/clients": {
+      "get": {
+        "summary": "Lista os clientes",
+        "operationId": "clients",
+        "tags": [
+          "Clientes"
+        ],
+        "description": "Retorna a lista de clientes associado ao token de API fornecido.",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "required": false,
+            "description": "Número da página"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            },
+            "required": false,
+            "description": "Quantidade de registros por página. O limite máximo é 100."
+          },
+          {
+            "name": "active",
+            "in": "query",
+            "required": false,
+            "description": "Busque por clientes ativos ou inativos.",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "description": "Busca textual aplicada aos seguintes campos:\n\n- Name\n- Nickname\n- Phone\n- Cellphone\n- CPF\n\nA busca é parcial e não diferencia maiúsculas de minúsculas.\n",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Clientes encontrados",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "total": {
+                      "type": "integer",
+                      "example": 1,
+                      "description": "Total de clientes encontrados para esta busca"
+                    },
+                    "page": {
+                      "type": "integer",
+                      "example": 1,
+                      "description": "Número da página atual"
+                    },
+                    "limit": {
+                      "type": "integer",
+                      "example": 20,
+                      "description": "Quantidade de registros por página"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer",
+                            "example": 1,
+                            "description": "Identificador único do cliente"
+                          },
+                          "name": {
+                            "type": "string",
+                            "example": "João Silva",
+                            "description": "Nome completo do cliente"
+                          },
+                          "phone": {
+                            "type": "string",
+                            "example": "1133334444",
+                            "description": "Telefone principal do cliente. Para entender o formato veja [Formato de Telefones](https://belasis-api.readme.io/reference/formato-de-telefones)"
+                          },
+                          "cellphone": {
+                            "type": "string",
+                            "example": "11999998888",
+                            "description": "Celular do cliente. Para entender o formato veja [Formato de Telefones](https://belasis-api.readme.io/reference/formato-de-telefones)"
+                          },
+                          "birthday": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "1990-05-15",
+                            "description": "Data de nascimento no formato YYYY-MM-DD"
+                          },
+                          "active": {
+                            "type": "boolean",
+                            "example": true,
+                            "description": "Indica se o cliente está ativo (true) ou inativo (false)"
+                          },
+                          "cpf": {
+                            "type": "string",
+                            "example": "268.455.330-08",
+                            "description": "CPF do cliente. Pode ser retornado formatado ou sem formatação"
+                          },
+                          "nickname": {
+                            "type": "string",
+                            "example": "João",
+                            "description": "Nome curto ou apelido do cliente"
+                          },
+                          "observation": {
+                            "type": "string",
+                            "example": "Novo cliente",
+                            "description": "Observações adicionais sobre o cliente"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "name"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "total",
+                    "page",
+                    "limit",
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autorizado (API Key ausente ou inválida)"
+          }
+        }
+      },
+      "post": {
+        "summary": "Cria cliente",
+        "operationId": "create-client",
+        "tags": [
+          "Clientes"
+        ],
+        "description": "Cria um novo cliente",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "Cliente criado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "example": 1,
+                      "description": "Identificador único do cliente"
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "João Silva",
+                      "description": "Nome completo do cliente"
+                    },
+                    "phone": {
+                      "type": "string",
+                      "example": "1133334444",
+                      "description": "Telefone principal do cliente. Para entender o formato veja [Formato de Telefones](https://belasis-api.readme.io/reference/formato-de-telefones)"
+                    },
+                    "cellphone": {
+                      "type": "string",
+                      "example": "11999998888",
+                      "description": "Celular do cliente. Para entender o formato veja [Formato de Telefones](https://belasis-api.readme.io/reference/formato-de-telefones)"
+                    },
+                    "birthday": {
+                      "type": "string",
+                      "format": "date",
+                      "example": "1990-05-15",
+                      "description": "Data de nascimento no formato YYYY-MM-DD"
+                    },
+                    "active": {
+                      "type": "boolean",
+                      "example": true,
+                      "description": "Indica se o cliente está ativo (true) ou inativo (false)"
+                    },
+                    "cpf": {
+                      "type": "string",
+                      "example": "268.455.330-08",
+                      "description": "CPF do cliente. Pode ser retornado formatado ou sem formatação"
+                    },
+                    "nickname": {
+                      "type": "string",
+                      "example": "João",
+                      "description": "Nome curto ou apelido do cliente"
+                    },
+                    "observation": {
+                      "type": "string",
+                      "example": "Novo cliente",
+                      "description": "Observações adicionais sobre o cliente"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "phone"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autorizado (API Key ausente ou inválida)"
+          },
+          "422": {
+            "description": "Parâmetros inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "example": "Celular já está em uso"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "João Silva",
+                    "description": "Nome completo do cliente"
+                  },
+                  "phone": {
+                    "type": "string",
+                    "example": "554733334444",
+                    "description": "Telefone com DDI e DDD, apenas números. Para entender melhor veja [Formato de Telefones](https://belasis-api.readme.io/reference/formato-de-telefones)"
+                  },
+                  "cellphone": {
+                    "type": "string",
+                    "example": "5547999998888",
+                    "description": "Celular com DDI e DDD, apenas números. Para entender melhor veja [Formato de Telefones](https://belasis-api.readme.io/reference/formato-de-telefones)"
+                  },
+                  "birthday": {
+                    "type": "string",
+                    "format": "date",
+                    "example": "1990-05-15",
+                    "description": "Data de nascimento no formato YYYY-MM-DD"
+                  },
+                  "active": {
+                    "type": "boolean",
+                    "example": true,
+                    "description": "Indica se o cliente está ativo (true) ou inativo (false)"
+                  },
+                  "cpf": {
+                    "type": "string",
+                    "example": "000.000.000-00",
+                    "description": "CPF do cliente. Pode ser enviado formatado (000.000.000-00) ou somente números."
+                  },
+                  "nickname": {
+                    "type": "string",
+                    "example": "João",
+                    "description": "Nome curto ou apelido do cliente"
+                  },
+                  "observation": {
+                    "type": "string",
+                    "example": "Novo cliente",
+                    "description": "Observações adicionais sobre o cliente"
+                  }
+                },
+                "required": [
+                  "name",
+                  "phone"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/clients/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "ID do cliente.\n\nInforme o identificador numérico único do cliente que será usado para buscar, atualizar ou remover o registro.\n",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "get": {
+        "summary": "Busca cliente",
+        "operationId": "client",
+        "tags": [
+          "Clientes"
+        ],
+        "description": "Retorna os detalhes de um cliente específico",
+        "responses": {
+          "200": {
+            "description": "Cliente encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "example": 1,
+                      "description": "Identificador único do cliente"
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "João Silva",
+                      "description": "Nome completo do cliente"
+                    },
+                    "phone": {
+                      "type": "string",
+                      "example": "1133334444",
+                      "description": "Telefone principal do cliente. Para entender o formato veja [Formato de Telefones](https://belasis-api.readme.io/reference/formato-de-telefones)"
+                    },
+                    "cellphone": {
+                      "type": "string",
+                      "example": "11999998888",
+                      "description": "Celular do cliente. Para entender o formato veja [Formato de Telefones](https://belasis-api.readme.io/reference/formato-de-telefones)"
+                    },
+                    "birthday": {
+                      "type": "string",
+                      "format": "date",
+                      "example": "1990-05-15",
+                      "description": "Data de nascimento no formato YYYY-MM-DD"
+                    },
+                    "active": {
+                      "type": "boolean",
+                      "example": true,
+                      "description": "Indica se o cliente está ativo (true) ou inativo (false)"
+                    },
+                    "cpf": {
+                      "type": "string",
+                      "example": "268.455.330-08",
+                      "description": "CPF do cliente. Pode ser retornado formatado ou sem formatação"
+                    },
+                    "nickname": {
+                      "type": "string",
+                      "example": "João",
+                      "description": "Nome curto ou apelido do cliente"
+                    },
+                    "observation": {
+                      "type": "string",
+                      "example": "Novo cliente",
+                      "description": "Observações adicionais sobre o cliente"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "phone"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autorizado (API Key ausente ou inválida)"
+          },
+          "404": {
+            "description": "Cliente não encontrado"
+          }
+        }
+      },
+      "patch": {
+        "summary": "Atualiza cliente",
+        "operationId": "update-client",
+        "tags": [
+          "Clientes"
+        ],
+        "description": "Atualiza os dados de um cliente existente",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Cliente atualizado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "example": 1,
+                      "description": "Identificador único do cliente"
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "João Silva Atualizado",
+                      "description": "Nome completo do cliente"
+                    },
+                    "phone": {
+                      "type": "string",
+                      "example": "1133334444",
+                      "description": "Telefone principal do cliente. Para entender o formato veja [Formato de Telefones](https://belasis-api.readme.io/reference/formato-de-telefones)"
+                    },
+                    "cellphone": {
+                      "type": "string",
+                      "example": "11999998888",
+                      "description": "Celular do cliente. Para entender o formato veja [Formato de Telefones](https://belasis-api.readme.io/reference/formato-de-telefones)"
+                    },
+                    "birthday": {
+                      "type": "string",
+                      "format": "date",
+                      "example": "1990-05-15",
+                      "description": "Data de nascimento no formato YYYY-MM-DD"
+                    },
+                    "active": {
+                      "type": "boolean",
+                      "example": true,
+                      "description": "Indica se o cliente está ativo (true) ou inativo (false)"
+                    },
+                    "cpf": {
+                      "type": "string",
+                      "example": "268.455.330-08",
+                      "description": "CPF do cliente. Pode ser retornado formatado ou sem formatação"
+                    },
+                    "nickname": {
+                      "type": "string",
+                      "example": "João",
+                      "description": "Nome curto ou apelido do cliente"
+                    },
+                    "observation": {
+                      "type": "string",
+                      "example": "Novo cliente",
+                      "description": "Observações adicionais sobre o cliente"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "phone"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autorizado (API Key ausente ou inválida)"
+          },
+          "404": {
+            "description": "Cliente não encontrado"
+          },
+          "422": {
+            "description": "Dados inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "example": "Celular já está em uso"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "João Silva Atualizado",
+                    "description": "Nome completo do cliente"
+                  },
+                  "phone": {
+                    "type": "string",
+                    "example": "554733334444",
+                    "description": "Telefone com DDI e DDD, apenas números. Para entender melhor veja [Formato de Telefones](https://belasis-api.readme.io/reference/formato-de-telefones)"
+                  },
+                  "cellphone": {
+                    "type": "string",
+                    "example": "5547999998888",
+                    "description": "Celular com DDI e DDD, apenas números. Para entender melhor veja [Formato de Telefones](https://belasis-api.readme.io/reference/formato-de-telefones)"
+                  },
+                  "active": {
+                    "type": "boolean",
+                    "example": false,
+                    "description": "Indica se o cliente está ativo (true) ou inativo (false)"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Remove cliente",
+        "operationId": "delete-client",
+        "tags": [
+          "Clientes"
+        ],
+        "description": "Remove um cliente existente",
+        "responses": {
+          "204": {
+            "description": "Cliente removido"
+          },
+          "401": {
+            "description": "Não autorizado (API Key ausente ou inválida)"
+          },
+          "404": {
+            "description": "Cliente não encontrado"
+          },
+          "409": {
+            "description": "Cliente desativado"
+          }
+        }
+      }
+    },
+    "/api/v1/employees": {
+      "get": {
+        "summary": "Lista os profissionais",
+        "operationId": "employees",
+        "tags": [
+          "Profissionais"
+        ],
+        "description": "Retorna a lista de profissionais associado ao token de API fornecido.",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "required": false,
+            "description": "Número da página"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            },
+            "required": false,
+            "description": "Quantidade de registros por página. O limite máximo é 100."
+          },
+          {
+            "name": "active",
+            "in": "query",
+            "required": false,
+            "description": "Busque por profissionais ativos ou inativos.",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "description": "Busca textual aplicada aos seguintes campos:\n\n- ID\n- Name\n\nA busca é parcial e não diferencia maiúsculas de minúsculas.\n",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Profissionais encontrados",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "total": {
+                      "type": "integer",
+                      "example": 1,
+                      "description": "Total de profissionais encontrados para esta busca"
+                    },
+                    "page": {
+                      "type": "integer",
+                      "example": 1,
+                      "description": "Número da página atual"
+                    },
+                    "limit": {
+                      "type": "integer",
+                      "example": 20,
+                      "description": "Quantidade de registros por página"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer",
+                            "example": 1,
+                            "description": "Identificador único do profissional"
+                          },
+                          "name": {
+                            "type": "string",
+                            "example": "João Silva",
+                            "description": "Nome completo do profissional"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "name"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "total",
+                    "page",
+                    "limit",
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autorizado (API Key ausente ou inválida)"
+          }
+        }
+      }
+    },
+    "/api/v1/employees/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "ID do profissional.\n\nInforme o identificador numérico único do profissional que será usado\npara buscar o registro ou operações relacionadas.\n",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "get": {
+        "summary": "Busca profissional",
+        "operationId": "employee",
+        "tags": [
+          "Profissionais"
+        ],
+        "description": "Retorna os detalhes de um profissional específico",
+        "responses": {
+          "200": {
+            "description": "Profissional encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "example": 1,
+                      "description": "Identificador único do profissional"
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "João Silva",
+                      "description": "Nome completo do profissional"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autorizado (API Key ausente ou inválida)"
+          },
+          "404": {
+            "description": "Profissional não encontrado"
+          }
+        }
+      }
+    },
+    "/api/v1/employees/{id}/free_times": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "ID do profissional.\n\nInforme o identificador numérico único do profissional para o qual\nserão consultados os horários disponíveis.\n",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "date",
+          "in": "query",
+          "schema": {
+            "type": "string",
+            "format": "date"
+          },
+          "required": true,
+          "description": "Data no formato YYYY-MM-DD"
+        }
+      ],
+      "get": {
+        "summary": "Retorna horários disponíveis",
+        "operationId": "employee-free-times",
+        "tags": [
+          "Profissionais"
+        ],
+        "description": "Retorna os horários disponíveis de um profissional",
+        "responses": {
+          "200": {
+            "description": "Horários disponíveis retornados",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "hour": {
+                        "type": "string",
+                        "example": "08:00",
+                        "description": "Horário disponível no formato HH:MM"
+                      },
+                      "label": {
+                        "type": "string",
+                        "example": "available",
+                        "enum": [
+                          "available",
+                          "unavailable"
+                        ],
+                        "description": "Rótulo que indica se o horário está disponível ('available') ou indisponível ('unavailable')"
+                      }
+                    },
+                    "required": [
+                      "hour",
+                      "label"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autorizado (API Key ausente ou inválida)"
+          },
+          "404": {
+            "description": "Profissional não encontrado"
+          }
+        }
+      }
+    },
+    "/api/v1/employees/{id}/services": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "ID do profissional.\n\nInforme o identificador numérico único do profissional para o qual\nserão consultados os serviços associados.\n",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "schema": {
+            "type": "integer",
+            "default": 1
+          },
+          "required": false,
+          "description": "Número da página"
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "schema": {
+            "type": "integer",
+            "default": 20
+          },
+          "required": false,
+          "description": "Quantidade de registros por página. O limite máximo é 100."
+        },
+        {
+          "name": "active",
+          "in": "query",
+          "required": false,
+          "description": "Busque por serviços ativos ou inativos.",
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "available_to_online_scheduling",
+          "in": "query",
+          "required": false,
+          "description": "Filtra por disponibilidade para agendamento online (true/false).",
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "search",
+          "in": "query",
+          "required": false,
+          "description": "Busca textual aplicada aos seguintes campos:\n\n- Descrição\n- Código\n\nA busca é parcial e não diferencia maiúsculas de minúsculas.\n",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "get": {
+        "summary": "Lista os serviços do profissional",
+        "operationId": "employee-services",
+        "tags": [
+          "Profissionais"
+        ],
+        "description": "Retorna os serviços associados ao profissional.",
+        "responses": {
+          "200": {
+            "description": "Serviços do profissional encontrados",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "total": {
+                      "type": "integer",
+                      "example": 2,
+                      "description": "Total de serviços encontrados para este profissional"
+                    },
+                    "page": {
+                      "type": "integer",
+                      "example": 1,
+                      "description": "Número da página atual"
+                    },
+                    "limit": {
+                      "type": "integer",
+                      "example": 20,
+                      "description": "Quantidade de registros por página"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer",
+                            "example": 1,
+                            "description": "Identificador único do serviço"
+                          },
+                          "description": {
+                            "type": "string",
+                            "example": "Corte de Cabelo",
+                            "description": "Descrição do serviço"
+                          },
+                          "price_cents": {
+                            "type": "integer",
+                            "example": 5000,
+                            "description": "Preço em centavos (ex.: 5000 = R$50,00)"
+                          },
+                          "duration": {
+                            "type": "integer",
+                            "example": 30,
+                            "description": "Duração em minutos"
+                          },
+                          "active": {
+                            "type": "boolean",
+                            "example": true,
+                            "description": "Indica se o serviço está ativo (true) ou inativo (false)"
+                          },
+                          "available_to_online_scheduling": {
+                            "type": "boolean",
+                            "example": true,
+                            "description": "Indica se o serviço está disponível para agendamento online (true/false)"
+                          },
+                          "group_id": {
+                            "type": "integer",
+                            "example": 1,
+                            "description": "ID da categoria (group) à qual o serviço pertence"
+                          },
+                          "commission": {
+                            "type": "number",
+                            "format": "float",
+                            "example": 10.5,
+                            "description": "Percentual de comissão associado ao serviço"
+                          },
+                          "observation": {
+                            "type": "string",
+                            "example": "Novo serviço",
+                            "description": "Observações adicionais sobre o serviço"
+                          },
+                          "favorite": {
+                            "type": "boolean",
+                            "example": false,
+                            "description": "Indica se o serviço está marcado como favorito"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "description",
+                          "price_cents",
+                          "group_id"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "total",
+                    "page",
+                    "limit",
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autorizado (API Key ausente ou inválida)"
+          },
+          "404": {
+            "description": "Profissional não encontrado"
+          }
+        }
+      }
+    },
+    "/api/v1/inventory/groups": {
+      "post": {
+        "summary": "Cria categoria",
+        "operationId": "create-category",
+        "tags": [
+          "Categorias"
+        ],
+        "description": "Cria uma nova categoria",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "Categoria criada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "example": 1,
+                      "description": "Identificador único da categoria"
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "Produtos",
+                      "description": "Nome da categoria"
+                    },
+                    "active": {
+                      "type": "boolean",
+                      "example": true,
+                      "description": "Indica se a categoria está ativa (true) ou inativa (false)"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autorizado (API Key ausente ou inválida)"
+          },
+          "422": {
+            "description": "Parâmetros inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "example": "Nome não pode ficar em branco"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "Produtos",
+                    "description": "Nome da categoria"
+                  },
+                  "active": {
+                    "type": "boolean",
+                    "example": true,
+                    "description": "Indica se a categoria será criada como ativa (true) ou inativa (false)"
+                  }
+                },
+                "required": [
+                  "name"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/inventory/groups/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "ID da categoria (identificador numérico único)",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "get": {
+        "summary": "Busca categoria",
+        "operationId": "category",
+        "tags": [
+          "Categorias"
+        ],
+        "description": "Retorna os detalhes de uma categoria específica",
+        "responses": {
+          "200": {
+            "description": "Categoria encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "example": 1,
+                      "description": "Identificador único da categoria"
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "Produtos",
+                      "description": "Nome da categoria"
+                    },
+                    "active": {
+                      "type": "boolean",
+                      "example": true,
+                      "description": "Indica se a categoria está ativa (true) ou inativa (false)"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autorizado (API Key ausente ou inválida)"
+          },
+          "404": {
+            "description": "Categoria não encontrada"
+          }
+        }
+      },
+      "patch": {
+        "summary": "Atualiza categoria",
+        "operationId": "update-category",
+        "tags": [
+          "Categorias"
+        ],
+        "description": "Atualiza os dados de uma categoria existente",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Categoria atualizada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "example": 1,
+                      "description": "Identificador único da categoria"
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "Produtos Atualizados",
+                      "description": "Nome atualizado da categoria"
+                    },
+                    "active": {
+                      "type": "boolean",
+                      "example": false,
+                      "description": "Indica se a categoria está ativa (true) ou inativa (false)"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autorizado (API Key ausente ou inválida)"
+          },
+          "404": {
+            "description": "Categoria não encontrada"
+          },
+          "422": {
+            "description": "Dados inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "example": "Nome não pode ficar em branco"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "Produtos Atualizados",
+                    "description": "Nome atualizado da categoria"
+                  },
+                  "active": {
+                    "type": "boolean",
+                    "example": false,
+                    "description": "Marca a categoria como ativa (true) ou inativa (false)"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Remove categoria",
+        "operationId": "delete-category",
+        "tags": [
+          "Categorias"
+        ],
+        "description": "Remove uma categoria existente",
+        "responses": {
+          "204": {
+            "description": "Categoria removida"
+          },
+          "401": {
+            "description": "Não autorizado (API Key ausente ou inválida)"
+          },
+          "404": {
+            "description": "Categoria não encontrada"
+          },
+          "409": {
+            "description": "Categoria desativada por dependencias"
+          },
+          "422": {
+            "description": "Falha ao remover categoria"
+          }
+        }
+      }
+    },
+    "/api/v1/inventory/services": {
+      "get": {
+        "summary": "Lista os serviços",
+        "operationId": "services",
+        "tags": [
+          "Serviços"
+        ],
+        "description": "Retorna a lista de serviços associados ao token de API fornecido.",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "required": false,
+            "description": "Número da página"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            },
+            "required": false,
+            "description": "Quantidade de registros por página. O limite máximo é 100."
+          },
+          {
+            "name": "active",
+            "in": "query",
+            "required": false,
+            "description": "Busque por serviços ativos (true) ou inativos (false).",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "available_to_online_scheduling",
+            "in": "query",
+            "required": false,
+            "description": "Filtra por disponibilidade para agendamento online (true/false).",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "description": "Busca textual aplicada aos seguintes campos:\n\n- Descrição\n- Código\n\nBusca parcial e não diferencia maiúsculas de minúsculas.\n",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Serviços encontrados",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "total": {
+                      "type": "integer",
+                      "example": 3,
+                      "description": "Total de serviços encontrados para esta busca"
+                    },
+                    "page": {
+                      "type": "integer",
+                      "example": 1,
+                      "description": "Número da página atual"
+                    },
+                    "limit": {
+                      "type": "integer",
+                      "example": 20,
+                      "description": "Quantidade de registros por página"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer",
+                            "example": 1,
+                            "description": "Identificador único do serviço"
+                          },
+                          "description": {
+                            "type": "string",
+                            "example": "Corte de Cabelo",
+                            "description": "Descrição do serviço"
+                          },
+                          "price_cents": {
+                            "type": "integer",
+                            "example": 5000,
+                            "description": "Preço em centavos (ex.: 5000 = R$50,00)"
+                          },
+                          "duration": {
+                            "type": "integer",
+                            "example": 30,
+                            "description": "Duração em minutos"
+                          },
+                          "active": {
+                            "type": "boolean",
+                            "example": true,
+                            "description": "Indica se o serviço está ativo (true) ou inativo (false)"
+                          },
+                          "available_to_online_scheduling": {
+                            "type": "boolean",
+                            "example": true,
+                            "description": "Indica se o serviço está disponível para agendamento online (true/false)"
+                          },
+                          "group_id": {
+                            "type": "integer",
+                            "example": 1,
+                            "description": "ID da categoria (group) à qual o serviço pertence"
+                          },
+                          "commission": {
+                            "type": "number",
+                            "format": "float",
+                            "example": 10.5,
+                            "description": "Percentual de comissão associado ao serviço"
+                          },
+                          "observation": {
+                            "type": "string",
+                            "example": "Novo serviço",
+                            "description": "Observações adicionais sobre o serviço"
+                          },
+                          "favorite": {
+                            "type": "boolean",
+                            "example": false,
+                            "description": "Indica se o serviço está marcado como favorito"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "description",
+                          "price_cents",
+                          "group_id"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "total",
+                    "page",
+                    "limit",
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autorizado (API Key ausente ou inválida)"
+          }
+        }
+      },
+      "post": {
+        "summary": "Cria serviço",
+        "operationId": "create-service",
+        "tags": [
+          "Serviços"
+        ],
+        "description": "Cria um novo serviço",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "Serviço criado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "example": 1,
+                      "description": "Identificador único do serviço"
+                    },
+                    "description": {
+                      "type": "string",
+                      "example": "Corte Premium",
+                      "description": "Descrição do serviço"
+                    },
+                    "price_cents": {
+                      "type": "integer",
+                      "example": 8000,
+                      "description": "Preço em centavos (ex.: 8000 = R$80,00)"
+                    },
+                    "duration": {
+                      "type": "integer",
+                      "example": 45,
+                      "description": "Duração em minutos"
+                    },
+                    "active": {
+                      "type": "boolean",
+                      "example": true,
+                      "description": "Indica se o serviço está ativo (true) ou inativo (false)"
+                    },
+                    "available_to_online_scheduling": {
+                      "type": "boolean",
+                      "example": true,
+                      "description": "Indica se o serviço está disponível para agendamento online (true/false)"
+                    },
+                    "group_id": {
+                      "type": "integer",
+                      "example": 1,
+                      "description": "ID da categoria (group) à qual o serviço pertence"
+                    },
+                    "commission": {
+                      "type": "number",
+                      "format": "float",
+                      "example": 15,
+                      "description": "Percentual de comissão do serviço"
+                    },
+                    "observation": {
+                      "type": "string",
+                      "example": "Novo serviço",
+                      "description": "Observações adicionais sobre o serviço"
+                    },
+                    "favorite": {
+                      "type": "boolean",
+                      "example": false,
+                      "description": "Indica se o serviço é favorito"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "description",
+                    "price_cents"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autorizado (API Key ausente ou inválida)"
+          },
+          "422": {
+            "description": "Parâmetros inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "example": "Descrição não pode ficar em branco"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "description": {
+                    "type": "string",
+                    "example": "Corte de Cabelo",
+                    "description": "Descrição do serviço"
+                  },
+                  "price_cents": {
+                    "type": "integer",
+                    "example": 5000,
+                    "description": "Preço em centavos (ex.: 5000 = R$50,00)"
+                  },
+                  "duration": {
+                    "type": "integer",
+                    "example": 30,
+                    "description": "Duração em minutos"
+                  },
+                  "active": {
+                    "type": "boolean",
+                    "example": true,
+                    "description": "Indica se o serviço será criado como ativo (true) ou inativo (false)"
+                  },
+                  "available_to_online_scheduling": {
+                    "type": "boolean",
+                    "example": true,
+                    "description": "Indica se o serviço estará disponível para agendamento online (true/false)"
+                  },
+                  "group_id": {
+                    "type": "integer",
+                    "example": 1,
+                    "description": "ID da categoria (group) à qual o serviço pertence"
+                  },
+                  "commission": {
+                    "type": "number",
+                    "format": "float",
+                    "example": 10.5,
+                    "description": "Percentual de comissão do serviço"
+                  },
+                  "observation": {
+                    "type": "string",
+                    "example": "Novo serviço",
+                    "description": "Observações adicionais sobre o serviço"
+                  },
+                  "favorite": {
+                    "type": "boolean",
+                    "example": false,
+                    "description": "Indica se o serviço é favorito"
+                  }
+                },
+                "required": [
+                  "description",
+                  "price_cents",
+                  "group_id"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/inventory/services/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "ID do serviço (identificador numérico único)",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "patch": {
+        "summary": "Atualiza serviço",
+        "operationId": "update-service",
+        "tags": [
+          "Serviços"
+        ],
+        "description": "Atualiza os dados de um serviço existente",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Serviço atualizado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "example": 1,
+                      "description": "Identificador único do serviço"
+                    },
+                    "description": {
+                      "type": "string",
+                      "example": "Corte Premium Atualizado",
+                      "description": "Descrição do serviço"
+                    },
+                    "price_cents": {
+                      "type": "integer",
+                      "example": 9000,
+                      "description": "Preço em centavos (ex.: 9000 = R$90,00)"
+                    },
+                    "duration": {
+                      "type": "integer",
+                      "example": 50,
+                      "description": "Duração em minutos"
+                    },
+                    "active": {
+                      "type": "boolean",
+                      "example": true,
+                      "description": "Indica se o serviço está ativo (true) ou inativo (false)"
+                    },
+                    "available_to_online_scheduling": {
+                      "type": "boolean",
+                      "example": true,
+                      "description": "Indica se o serviço está disponível para agendamento online (true/false)"
+                    },
+                    "group_id": {
+                      "type": "integer",
+                      "example": 1,
+                      "description": "ID da categoria (group) à qual o serviço pertence"
+                    },
+                    "commission": {
+                      "type": "number",
+                      "format": "float",
+                      "example": 20,
+                      "description": "Percentual de comissão do serviço"
+                    },
+                    "observation": {
+                      "type": "string",
+                      "example": "Novo serviço",
+                      "description": "Observações adicionais sobre o serviço"
+                    },
+                    "favorite": {
+                      "type": "boolean",
+                      "example": false,
+                      "description": "Indica se o serviço é favorito"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "description",
+                    "price_cents"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autorizado (API Key ausente ou inválida)"
+          },
+          "404": {
+            "description": "Serviço não encontrado"
+          },
+          "422": {
+            "description": "Dados inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "example": "Descrição não pode ficar em branco"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "description": {
+                    "type": "string",
+                    "example": "Corte Premium Atualizado",
+                    "description": "Descrição do serviço"
+                  },
+                  "price_cents": {
+                    "type": "integer",
+                    "example": 9000,
+                    "description": "Preço em centavos (ex.: 9000 = R$90,00)"
+                  },
+                  "duration": {
+                    "type": "integer",
+                    "example": 50,
+                    "description": "Duração em minutos"
+                  },
+                  "active": {
+                    "type": "boolean",
+                    "example": true,
+                    "description": "Indica se o serviço será marcado como ativo (true) ou inativo (false)"
+                  },
+                  "available_to_online_scheduling": {
+                    "type": "boolean",
+                    "example": true,
+                    "description": "Indica se o serviço estará disponível para agendamento online (true/false)"
+                  },
+                  "commission": {
+                    "type": "number",
+                    "format": "float",
+                    "example": 20,
+                    "description": "Percentual de comissão do serviço"
+                  },
+                  "group_id": {
+                    "type": "integer",
+                    "example": 1,
+                    "description": "ID da categoria (group) à qual o serviço pertence"
+                  },
+                  "observation": {
+                    "type": "string",
+                    "example": "Novo serviço",
+                    "description": "Observações adicionais sobre o serviço"
+                  },
+                  "favorite": {
+                    "type": "boolean",
+                    "example": false,
+                    "description": "Indica se o serviço é favorito"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Remove serviço",
+        "operationId": "delete-service",
+        "tags": [
+          "Serviços"
+        ],
+        "description": "Remove um serviço existente",
+        "responses": {
+          "204": {
+            "description": "Serviço removido"
+          },
+          "401": {
+            "description": "Não autorizado (API Key ausente ou inválida)"
+          },
+          "404": {
+            "description": "Serviço não encontrado"
+          },
+          "409": {
+            "description": "Serviço desativado por dependências",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "description": "Mensagens de erro relacionadas à operação"
+                      }
+                    },
+                    "deactivated": {
+                      "type": "boolean",
+                      "example": true,
+                      "description": "Indica se o serviço foi desativado devido a dependências"
+                    }
+                  },
+                  "required": [
+                    "errors",
+                    "deactivated"
+                  ]
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Falha ao remover serviço",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "description": "Mensagens de erro relacionadas à operação"
+                      }
+                    },
+                    "deactivated": {
+                      "type": "boolean",
+                      "example": false,
+                      "description": "Indica se o serviço foi desativado devido a dependências"
+                    }
+                  },
+                  "required": [
+                    "errors",
+                    "deactivated"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/schedule_groups": {
+      "get": {
+        "summary": "Lista agendamentos",
+        "operationId": "schedule-groups",
+        "tags": [
+          "Agendamentos"
+        ],
+        "description": "Retorna a lista de grupos de agendamentos associados ao token de API fornecido.",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "required": false,
+            "description": "Número da página"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            },
+            "required": false,
+            "description": "Quantidade de registros por página. O limite máximo é 100."
+          },
+          {
+            "name": "client_id",
+            "in": "query",
+            "required": false,
+            "description": "Filtrar por ID do cliente. Veja a listagem de [Clientes](https://belasis-api.readme.io/reference/clients) para ver os possíveis valores",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "confirmed",
+                "unconfirmed",
+                "disconfirm",
+                "waiting"
+              ]
+            },
+            "required": false,
+            "description": "Filtrar por status do agendamento. Veja os possíveis status em [Valores enumerados](https://belasis-api.readme.io/reference/valores-enumerados)"
+          },
+          {
+            "name": "start_date",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "required": false,
+            "description": "Data inicial para filtrar agendamentos (formato: YYYY-MM-DD). Pode ser usado sozinho ou em conjunto com end_date"
+          },
+          {
+            "name": "end_date",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "required": false,
+            "description": "Data final para filtrar agendamentos (formato: YYYY-MM-DD). Pode ser usado sozinho ou em conjunto com start_date"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Agendamentos encontrados",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "total": {
+                      "type": "integer",
+                      "example": 3,
+                      "description": "Total de agendamentos encontrados para esta busca"
+                    },
+                    "page": {
+                      "type": "integer",
+                      "example": 1,
+                      "description": "Número da página atual"
+                    },
+                    "limit": {
+                      "type": "integer",
+                      "example": 20,
+                      "description": "Quantidade de registros por página"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer",
+                            "example": 1,
+                            "description": "Identificador único do grupo de agendamento"
+                          },
+                          "client_id": {
+                            "type": "integer",
+                            "example": 1,
+                            "description": "ID do cliente. Veja a listagem de [Clientes](https://belasis-api.readme.io/reference/clients) para ver os possíveis valores"
+                          },
+                          "status": {
+                            "type": "string",
+                            "example": "confirmed",
+                            "enum": [
+                              "confirmed",
+                              "unconfirmed",
+                              "disconfirm",
+                              "waiting"
+                            ],
+                            "description": "Status do agendamento. Veja os possíveis status em [Valores enumerados](https://belasis-api.readme.io/reference/valores-enumerados)"
+                          },
+                          "observation": {
+                            "type": "string",
+                            "example": "Observação do agendamento",
+                            "description": "Observações adicionais sobre o agendamento"
+                          },
+                          "date": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2025-01-15",
+                            "description": "Data do agendamento no formato YYYY-MM-DD"
+                          },
+                          "calendars": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "integer",
+                                  "example": 1,
+                                  "description": "Identificador único do calendário dentro do agendamento"
+                                },
+                                "inventory_product_id": {
+                                  "type": "integer",
+                                  "example": 1,
+                                  "description": "ID do serviço. Veja a listagem de [Serviços](https://belasis-api.readme.io/reference/services) para ver os possíveis valores"
+                                },
+                                "employee_id": {
+                                  "type": "integer",
+                                  "example": 1,
+                                  "description": "ID do profissional. Veja a listagem de [Profissionais](https://belasis-api.readme.io/reference/employees) para ver os possíveis valores"
+                                },
+                                "start_hour": {
+                                  "type": "string",
+                                  "example": "10:00",
+                                  "description": "Hora de início no formato HH:MM"
+                                },
+                                "end_hour": {
+                                  "type": "string",
+                                  "example": "11:00",
+                                  "description": "Hora de término no formato HH:MM"
+                                },
+                                "reminder": {
+                                  "type": "boolean",
+                                  "example": true,
+                                  "description": "Indica se deve enviar o lembrete (true) ou não (false)"
+                                },
+                                "observation": {
+                                  "type": "string",
+                                  "example": "Observação do calendário",
+                                  "description": "Observações específicas deste item do calendário"
+                                },
+                                "client_id": {
+                                  "type": "integer",
+                                  "example": 1,
+                                  "description": "ID do cliente. Veja a listagem de [Clientes](https://belasis-api.readme.io/reference/clients) para ver os possíveis valores"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "client_id",
+                          "date"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "total",
+                    "page",
+                    "limit",
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autorizado (API Key ausente ou inválida)"
+          }
+        }
+      },
+      "post": {
+        "summary": "Cria agendamento",
+        "operationId": "create-schedule-group",
+        "tags": [
+          "Agendamentos"
+        ],
+        "description": "Cria um novo agendamento",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "Agendamento criado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "example": 1,
+                      "description": "Identificador único do grupo de agendamento"
+                    },
+                    "client_id": {
+                      "type": "integer",
+                      "example": 1,
+                      "description": "ID do cliente. Veja a listagem de [Clientes](https://belasis-api.readme.io/reference/clients) para ver os possíveis valores"
+                    },
+                    "status": {
+                      "type": "string",
+                      "example": "confirmed",
+                      "enum": [
+                        "confirmed",
+                        "unconfirmed",
+                        "disconfirm",
+                        "waiting"
+                      ],
+                      "description": "Status do agendamento. Veja os possíveis status em [Valores enumerados](https://belasis-api.readme.io/reference/valores-enumerados)"
+                    },
+                    "observation": {
+                      "type": "string",
+                      "example": "Novo agendamento",
+                      "description": "Observações adicionais sobre o agendamento"
+                    },
+                    "date": {
+                      "type": "string",
+                      "format": "date",
+                      "example": "2025-01-15",
+                      "description": "Data do agendamento no formato YYYY-MM-DD"
+                    },
+                    "calendars": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer",
+                            "example": 1,
+                            "description": "Identificador único do calendário dentro do agendamento"
+                          },
+                          "inventory_product_id": {
+                            "type": "integer",
+                            "example": 1,
+                            "description": "ID do serviço. Veja a listagem de [Serviços](https://belasis-api.readme.io/reference/services) para ver os possíveis valores"
+                          },
+                          "employee_id": {
+                            "type": "integer",
+                            "example": 1,
+                            "description": "ID do profissional. Veja a listagem de [Profissionais](https://belasis-api.readme.io/reference/employees) para ver os possíveis valores"
+                          },
+                          "start_hour": {
+                            "type": "string",
+                            "example": "10:00",
+                            "description": "Hora de início no formato HH:MM"
+                          },
+                          "end_hour": {
+                            "type": "string",
+                            "example": "11:00",
+                            "description": "Hora de término no formato HH:MM"
+                          },
+                          "reminder": {
+                            "type": "boolean",
+                            "example": true,
+                            "description": "Indica se deve enviar o lembrete (true) ou não (false)"
+                          },
+                          "client_id": {
+                            "type": "integer",
+                            "example": 1,
+                            "description": "ID do cliente. Veja a listagem de [Clientes](https://belasis-api.readme.io/reference/clients) para ver os possíveis valores"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "client_id",
+                    "date",
+                    "calendars"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autorizado (API Key ausente ou inválida)"
+          },
+          "422": {
+            "description": "Parâmetros inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "example": "Cliente não pode ficar em branco"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "client_id": {
+                    "type": "integer",
+                    "example": 1,
+                    "description": "ID do cliente. Veja a listagem de [Clientes](https://belasis-api.readme.io/reference/clients) para ver os possíveis valores"
+                  },
+                  "date": {
+                    "type": "string",
+                    "format": "date",
+                    "example": "2025-01-15",
+                    "description": "Data do agendamento no formato YYYY-MM-DD"
+                  },
+                  "status": {
+                    "type": "string",
+                    "example": "confirmed",
+                    "enum": [
+                      "confirmed",
+                      "unconfirmed",
+                      "disconfirm",
+                      "waiting"
+                    ],
+                    "description": "Status do agendamento. Veja os possíveis status em [Valores enumerados](https://belasis-api.readme.io/reference/valores-enumerados)"
+                  },
+                  "observation": {
+                    "type": "string",
+                    "example": "Observação do agendamento",
+                    "description": "Observações adicionais sobre o agendamento"
+                  },
+                  "calendars_attributes": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "inventory_product_id": {
+                          "type": "integer",
+                          "example": 1,
+                          "description": "ID do serviço. Veja a listagem de [Serviços](https://belasis-api.readme.io/reference/services) para ver os possíveis valores"
+                        },
+                        "employee_id": {
+                          "type": "integer",
+                          "example": 1,
+                          "description": "ID do profissional. Veja a listagem de [Profissionais](https://belasis-api.readme.io/reference/employees) para ver os possíveis valores"
+                        },
+                        "start_hour": {
+                          "type": "string",
+                          "example": "10:00",
+                          "description": "Hora de início no formato HH:MM"
+                        },
+                        "end_hour": {
+                          "type": "string",
+                          "example": "11:00",
+                          "description": "Hora de término no formato HH:MM"
+                        },
+                        "reminder": {
+                          "type": "boolean",
+                          "example": true,
+                          "description": "Indica se deve enviar o lembrete (true) ou não (false)"
+                        }
+                      },
+                      "required": [
+                        "inventory_product_id",
+                        "employee_id",
+                        "start_hour",
+                        "end_hour"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "client_id",
+                  "date",
+                  "calendars_attributes"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/schedule_groups/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "get": {
+        "summary": "Busca agendamento",
+        "operationId": "schedule-group",
+        "tags": [
+          "Agendamentos"
+        ],
+        "description": "Retorna os detalhes de um agendamento específico",
+        "responses": {
+          "200": {
+            "description": "Agendamento encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "example": 1,
+                      "description": "Identificador único do grupo de agendamento"
+                    },
+                    "client_id": {
+                      "type": "integer",
+                      "example": 1,
+                      "description": "ID do cliente. Veja a listagem de [Clientes](https://belasis-api.readme.io/reference/clients) para ver os possíveis valores"
+                    },
+                    "status": {
+                      "type": "string",
+                      "example": "confirmed",
+                      "enum": [
+                        "confirmed",
+                        "unconfirmed",
+                        "disconfirm",
+                        "waiting"
+                      ],
+                      "description": "Status do agendamento. Veja os possíveis status em [Valores enumerados](https://belasis-api.readme.io/reference/valores-enumerados)"
+                    },
+                    "observation": {
+                      "type": "string",
+                      "example": "Observação do agendamento",
+                      "description": "Observações adicionais sobre o agendamento"
+                    },
+                    "date": {
+                      "type": "string",
+                      "format": "date",
+                      "example": "2025-01-15",
+                      "description": "Data do agendamento no formato YYYY-MM-DD"
+                    },
+                    "calendars": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer",
+                            "example": 1,
+                            "description": "Identificador único do calendário dentro do agendamento"
+                          },
+                          "inventory_product_id": {
+                            "type": "integer",
+                            "example": 1,
+                            "description": "ID do serviço. Veja a listagem de [Serviços](https://belasis-api.readme.io/reference/services) para ver os possíveis valores"
+                          },
+                          "employee_id": {
+                            "type": "integer",
+                            "example": 1,
+                            "description": "ID do profissional. Veja a listagem de [Profissionais](https://belasis-api.readme.io/reference/employees) para ver os possíveis valores"
+                          },
+                          "start_hour": {
+                            "type": "string",
+                            "example": "10:00",
+                            "description": "Hora de início no formato HH:MM"
+                          },
+                          "end_hour": {
+                            "type": "string",
+                            "example": "11:00",
+                            "description": "Hora de término no formato HH:MM"
+                          },
+                          "reminder": {
+                            "type": "boolean",
+                            "example": true,
+                            "description": "Indica se deve enviar o lembrete (true) ou não (false)"
+                          },
+                          "client_id": {
+                            "type": "integer",
+                            "example": 1,
+                            "description": "ID do cliente. Veja a listagem de [Clientes](https://belasis-api.readme.io/reference/clients) para ver os possíveis valores"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "client_id",
+                    "date"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autorizado (API Key ausente ou inválida)"
+          },
+          "404": {
+            "description": "Agendamento não encontrado"
+          }
+        }
+      },
+      "patch": {
+        "summary": "Atualiza agendamento",
+        "operationId": "update-schedule-group",
+        "tags": [
+          "Agendamentos"
+        ],
+        "description": "Atualiza os dados de um agendamento existente",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Agendamento atualizado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "example": 1,
+                      "description": "Identificador único do grupo de agendamento"
+                    },
+                    "client_id": {
+                      "type": "integer",
+                      "example": 1,
+                      "description": "ID do cliente. Veja a listagem de [Clientes](https://belasis-api.readme.io/reference/clients) para ver os possíveis valores"
+                    },
+                    "status": {
+                      "type": "string",
+                      "example": "unconfirmed",
+                      "enum": [
+                        "confirmed",
+                        "unconfirmed",
+                        "disconfirm",
+                        "waiting"
+                      ],
+                      "description": "Status do agendamento. Veja os possíveis status em [Valores enumerados](https://belasis-api.readme.io/reference/valores-enumerados)"
+                    },
+                    "observation": {
+                      "type": "string",
+                      "example": "Agendamento atualizado",
+                      "description": "Observações adicionais sobre o agendamento"
+                    },
+                    "date": {
+                      "type": "string",
+                      "format": "date",
+                      "example": "2025-01-15",
+                      "description": "Data do agendamento no formato YYYY-MM-DD"
+                    },
+                    "calendars": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer",
+                            "example": 1,
+                            "description": "Identificador único do calendário dentro do agendamento"
+                          },
+                          "inventory_product_id": {
+                            "type": "integer",
+                            "example": 1,
+                            "description": "ID do serviço. Veja a listagem de [Serviços](https://belasis-api.readme.io/reference/services) para ver os possíveis valores"
+                          },
+                          "employee_id": {
+                            "type": "integer",
+                            "example": 1,
+                            "description": "ID do profissional. Veja a listagem de [Profissionais](https://belasis-api.readme.io/reference/employees) para ver os possíveis valores"
+                          },
+                          "start_hour": {
+                            "type": "string",
+                            "example": "14:00",
+                            "description": "Hora de início no formato HH:MM"
+                          },
+                          "end_hour": {
+                            "type": "string",
+                            "example": "15:00",
+                            "description": "Hora de término no formato HH:MM"
+                          },
+                          "reminder": {
+                            "type": "boolean",
+                            "example": false,
+                            "description": "Indica se deve enviar o lembrete (true) ou não (false)"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "client_id",
+                    "date"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autorizado (API Key ausente ou inválida)"
+          },
+          "404": {
+            "description": "Agendamento não encontrado"
+          },
+          "422": {
+            "description": "Dados inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "example": "Status não é válido"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "example": "unconfirmed",
+                    "enum": [
+                      "confirmed",
+                      "unconfirmed",
+                      "disconfirm",
+                      "waiting"
+                    ],
+                    "description": "Status do agendamento. Veja os possíveis status em [Valores enumerados](https://belasis-api.readme.io/reference/valores-enumerados)"
+                  },
+                  "observation": {
+                    "type": "string",
+                    "example": "Agendamento atualizado",
+                    "description": "Observações adicionais sobre o agendamento"
+                  },
+                  "calendars_attributes": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "example": 1,
+                          "description": "Identificador único do calendário dentro do agendamento"
+                        },
+                        "start_hour": {
+                          "type": "string",
+                          "example": "14:00",
+                          "description": "Hora de início no formato HH:MM"
+                        },
+                        "end_hour": {
+                          "type": "string",
+                          "example": "15:00",
+                          "description": "Hora de término no formato HH:MM"
+                        },
+                        "reminder": {
+                          "type": "boolean",
+                          "example": false,
+                          "description": "Indica se haverá lembrete (true) ou não (false)"
+                        },
+                        "_destroy": {
+                          "type": "boolean",
+                          "example": false,
+                          "description": "Marca o calendário para a exclusão"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Remove agendamento",
+        "operationId": "delete-schedule-group",
+        "tags": [
+          "Agendamentos"
+        ],
+        "description": "Remove um agendamento existente",
+        "responses": {
+          "204": {
+            "description": "Agendamento removido"
+          },
+          "401": {
+            "description": "Não autorizado (API Key ausente ou inválida)"
+          },
+          "404": {
+            "description": "Agendamento não encontrado"
+          },
+          "422": {
+            "description": "Falha ao remover agendamento"
+          }
+        }
+      }
+    },
+    "/api/v1/schedule_groups/{id}/confirm": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "patch": {
+        "summary": "Confirma agendamento",
+        "operationId": "confirm-schedule-group",
+        "tags": [
+          "Agendamentos"
+        ],
+        "description": "Confirma um agendamento existente",
+        "responses": {
+          "200": {
+            "description": "Agendamento confirmado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "example": 1,
+                      "description": "Identificador único do grupo de agendamento"
+                    },
+                    "client_id": {
+                      "type": "integer",
+                      "example": 1,
+                      "description": "ID do cliente. Veja a listagem de [Clientes](https://belasis-api.readme.io/reference/clients) para ver os possíveis valores"
+                    },
+                    "status": {
+                      "type": "string",
+                      "example": "confirmed",
+                      "enum": [
+                        "confirmed",
+                        "unconfirmed",
+                        "disconfirm",
+                        "waiting"
+                      ],
+                      "description": "Status do agendamento. Veja os possíveis status em [Valores enumerados](https://belasis-api.readme.io/reference/valores-enumerados)"
+                    },
+                    "observation": {
+                      "type": "string",
+                      "example": "Observação do agendamento",
+                      "description": "Observações adicionais sobre o agendamento"
+                    },
+                    "date": {
+                      "type": "string",
+                      "format": "date",
+                      "example": "2025-01-15",
+                      "description": "Data do agendamento no formato YYYY-MM-DD"
+                    },
+                    "calendars": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer",
+                            "example": 1,
+                            "description": "Identificador único do calendário dentro do agendamento"
+                          },
+                          "inventory_product_id": {
+                            "type": "integer",
+                            "example": 1,
+                            "description": "ID do serviço. Veja a listagem de [Serviços](https://belasis-api.readme.io/reference/services) para ver os possíveis valores"
+                          },
+                          "employee_id": {
+                            "type": "integer",
+                            "example": 1,
+                            "description": "ID do profissional. Veja a listagem de [Profissionais](https://belasis-api.readme.io/reference/employees) para ver os possíveis valores"
+                          },
+                          "start_hour": {
+                            "type": "string",
+                            "example": "14:00",
+                            "description": "Hora de início no formato HH:MM"
+                          },
+                          "end_hour": {
+                            "type": "string",
+                            "example": "15:00",
+                            "description": "Hora de término no formato HH:MM"
+                          },
+                          "reminder": {
+                            "type": "boolean",
+                            "example": false,
+                            "description": "Indica se deve enviar o lembrete (true) ou não (false)"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "client_id",
+                    "status",
+                    "date",
+                    "calendars"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autorizado (API Key ausente ou inválida)"
+          },
+          "404": {
+            "description": "Agendamento não encontrado"
+          }
+        }
+      }
+    },
+    "/api/v1/schedule_groups/{id}/unconfirm": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "patch": {
+        "summary": "Marca agendamento como não confirmado",
+        "operationId": "unconfirm-schedule-group",
+        "tags": [
+          "Agendamentos"
+        ],
+        "description": "Marca um agendamento como não confirmado",
+        "responses": {
+          "200": {
+            "description": "Agendamento marcado como não confirmado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "example": 1,
+                      "description": "Identificador único do grupo de agendamento"
+                    },
+                    "client_id": {
+                      "type": "integer",
+                      "example": 1,
+                      "description": "ID do cliente. Veja a listagem de [Clientes](https://belasis-api.readme.io/reference/clients) para ver os possíveis valores"
+                    },
+                    "status": {
+                      "type": "string",
+                      "example": "unconfirmed",
+                      "enum": [
+                        "confirmed",
+                        "unconfirmed",
+                        "disconfirm",
+                        "waiting"
+                      ],
+                      "description": "Status do agendamento. Veja os possíveis status em [Valores enumerados](https://belasis-api.readme.io/reference/valores-enumerados)"
+                    },
+                    "observation": {
+                      "type": "string",
+                      "example": "Observação do agendamento",
+                      "description": "Observações adicionais sobre o agendamento"
+                    },
+                    "date": {
+                      "type": "string",
+                      "format": "date",
+                      "example": "2025-01-15",
+                      "description": "Data do agendamento no formato YYYY-MM-DD"
+                    },
+                    "calendars": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer",
+                            "example": 1,
+                            "description": "Identificador único do calendário dentro do agendamento"
+                          },
+                          "inventory_product_id": {
+                            "type": "integer",
+                            "example": 1,
+                            "description": "ID do serviço. Veja a listagem de [Serviços](https://belasis-api.readme.io/reference/services) para ver os possíveis valores"
+                          },
+                          "employee_id": {
+                            "type": "integer",
+                            "example": 1,
+                            "description": "ID do profissional. Veja a listagem de [Profissionais](https://belasis-api.readme.io/reference/employees) para ver os possíveis valores"
+                          },
+                          "start_hour": {
+                            "type": "string",
+                            "example": "14:00",
+                            "description": "Hora de início no formato HH:MM"
+                          },
+                          "end_hour": {
+                            "type": "string",
+                            "example": "15:00",
+                            "description": "Hora de término no formato HH:MM"
+                          },
+                          "reminder": {
+                            "type": "boolean",
+                            "example": false,
+                            "description": "Indica se deve enviar o lembrete (true) ou não (false)"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "client_id",
+                    "status",
+                    "date",
+                    "calendars"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autorizado (API Key ausente ou inválida)"
+          },
+          "404": {
+            "description": "Agendamento não encontrado"
+          }
+        }
+      }
+    },
+    "/api/v1/schedule_groups/{id}/cancel": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "patch": {
+        "summary": "Cancela agendamento",
+        "operationId": "cancel-schedule-group",
+        "tags": [
+          "Agendamentos"
+        ],
+        "description": "Cancela um agendamento existente",
+        "responses": {
+          "200": {
+            "description": "Agendamento cancelado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "example": 1,
+                      "description": "Identificador único do grupo de agendamento"
+                    },
+                    "client_id": {
+                      "type": "integer",
+                      "example": 1,
+                      "description": "ID do cliente. Veja a listagem de [Clientes](https://belasis-api.readme.io/reference/clients) para ver os possíveis valores"
+                    },
+                    "status": {
+                      "type": "string",
+                      "example": "disconfirm",
+                      "enum": [
+                        "confirmed",
+                        "unconfirmed",
+                        "disconfirm",
+                        "waiting"
+                      ],
+                      "description": "Status do agendamento. Veja os possíveis status em [Valores enumerados](https://belasis-api.readme.io/reference/valores-enumerados)"
+                    },
+                    "observation": {
+                      "type": "string",
+                      "example": "Observação do agendamento",
+                      "description": "Observações adicionais sobre o agendamento"
+                    },
+                    "date": {
+                      "type": "string",
+                      "format": "date",
+                      "example": "2025-01-15",
+                      "description": "Data do agendamento no formato YYYY-MM-DD"
+                    },
+                    "calendars": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer",
+                            "example": 1,
+                            "description": "Identificador único do calendário dentro do agendamento"
+                          },
+                          "inventory_product_id": {
+                            "type": "integer",
+                            "example": 1,
+                            "description": "ID do serviço. Veja a listagem de [Serviços](https://belasis-api.readme.io/reference/services) para ver os possíveis valores"
+                          },
+                          "employee_id": {
+                            "type": "integer",
+                            "example": 1,
+                            "description": "ID do profissional. Veja a listagem de [Profissionais](https://belasis-api.readme.io/reference/employees) para ver os possíveis valores"
+                          },
+                          "start_hour": {
+                            "type": "string",
+                            "example": "14:00",
+                            "description": "Hora de início no formato HH:MM"
+                          },
+                          "end_hour": {
+                            "type": "string",
+                            "example": "15:00",
+                            "description": "Hora de término no formato HH:MM"
+                          },
+                          "reminder": {
+                            "type": "boolean",
+                            "example": false,
+                            "description": "Indica se deve enviar o lembrete (true) ou não (false)"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "client_id",
+                    "status",
+                    "date",
+                    "calendars"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autorizado (API Key ausente ou inválida)"
+          },
+          "404": {
+            "description": "Agendamento não encontrado"
+          }
+        }
+      }
+    },
+    "/api/v1/schedule_groups/{id}/waiting": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "patch": {
+        "summary": "Marca agendamento como aguardando",
+        "operationId": "waiting-schedule-group",
+        "tags": [
+          "Agendamentos"
+        ],
+        "description": "Marca um agendamento como aguardando",
+        "responses": {
+          "200": {
+            "description": "Agendamento marcado como aguardando",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "example": 1,
+                      "description": "Identificador único do grupo de agendamento"
+                    },
+                    "client_id": {
+                      "type": "integer",
+                      "example": 1,
+                      "description": "ID do cliente. Veja a listagem de [Clientes](https://belasis-api.readme.io/reference/clients) para ver os possíveis valores"
+                    },
+                    "status": {
+                      "type": "string",
+                      "example": "waiting",
+                      "enum": [
+                        "confirmed",
+                        "unconfirmed",
+                        "disconfirm",
+                        "waiting"
+                      ],
+                      "description": "Status do agendamento. Veja os possíveis status em [Valores enumerados](https://belasis-api.readme.io/reference/valores-enumerados)"
+                    },
+                    "observation": {
+                      "type": "string",
+                      "example": "Observação do agendamento",
+                      "description": "Observações adicionais sobre o agendamento"
+                    },
+                    "date": {
+                      "type": "string",
+                      "format": "date",
+                      "example": "2025-01-15",
+                      "description": "Data do agendamento no formato YYYY-MM-DD"
+                    },
+                    "calendars": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer",
+                            "example": 1,
+                            "description": "Identificador único do calendário dentro do agendamento"
+                          },
+                          "inventory_product_id": {
+                            "type": "integer",
+                            "example": 1,
+                            "description": "ID do serviço. Veja a listagem de [Serviços](https://belasis-api.readme.io/reference/services) para ver os possíveis valores"
+                          },
+                          "employee_id": {
+                            "type": "integer",
+                            "example": 1,
+                            "description": "ID do profissional. Veja a listagem de [Profissionais](https://belasis-api.readme.io/reference/employees) para ver os possíveis valores"
+                          },
+                          "start_hour": {
+                            "type": "string",
+                            "example": "14:00",
+                            "description": "Hora de início no formato HH:MM"
+                          },
+                          "end_hour": {
+                            "type": "string",
+                            "example": "15:00",
+                            "description": "Hora de término no formato HH:MM"
+                          },
+                          "reminder": {
+                            "type": "boolean",
+                            "example": false,
+                            "description": "Indica se deve enviar o lembrete (true) ou não (false)"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "client_id",
+                    "status",
+                    "date",
+                    "calendars"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autorizado (API Key ausente ou inválida)"
+          },
+          "404": {
+            "description": "Agendamento não encontrado"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "ACCESS-TOKEN": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "ACCESS-TOKEN"
+      }
+    }
+  },
+  "security": [
+    {
+      "ACCESS-TOKEN": []
+    }
+  ]
+}

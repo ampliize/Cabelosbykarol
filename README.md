@@ -10,6 +10,14 @@ Go-live alvo: **08/10/2026**.
 2. [TRD — especificação técnica](docs/02-TRD.md)
 3. [Arquitetura](docs/03-ARQUITETURA.md)
 4. [Plano de entrega e pendências](docs/04-PLANO-DE-ENTREGA.md)
+5. [API Belasis — mapeamento](docs/05-BELASIS-API.md) · [OpenAPI](docs/belasis-api/openapi.json)
+
+## Teste rápido da API Belasis
+
+```bash
+export BELASIS_TOKEN="bpk_..."   # nunca commitar
+./scripts/belasis-smoke.sh 5511987654321 2026-10-02
+```
 
 ## Stack
 
