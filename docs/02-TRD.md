@@ -110,7 +110,7 @@ Princípios (skill *tool-design*): poucas ferramentas, sem sobreposição, nome 
 | `agendar_horario` | Cria agendamento no Belasis | `servico_id`, `profissional_id`, `inicio` (ISO), `confirmacao_cliente` (texto literal do "sim") | `cliente_id`, `telefone`, `conversa_id` |
 | `alterar_agendamento` | Remarca ou cancela agendamento futuro **da própria cliente** | `agendamento_id`, `acao` (remarcar/cancelar), `novo_inicio?`, `confirmacao_cliente` | `cliente_id` |
 | `consultar_base_conhecimento` | Busca FAQ/políticas aprovadas | `pergunta` | — |
-| `transferir_para_humano` | Pausa o bot na conversa e notifica equipe com resumo | `motivo` (enum: pedido_cliente, reclamacao, fora_escopo, orcamento_visual, erro_sistema, incerteza), `resumo` | `conversa_id`, `telefone` |
+| `transferir_para_humano` | Encaminha ao responsável e pausa o agente nessa conversa; se ninguém responder em 3 min o agente volta. **Use também quando não souber a resposta** (`motivo=incerteza`) — nunca invente | `motivo` (enum: pedido_cliente, reclamacao, fora_escopo, orcamento_visual, erro_sistema, incerteza, opt_out), `resumo` (o que a cliente quer + o que já foi feito) | `conversa_id`, `telefone` |
 
 O **contexto da cliente** (cadastro, histórico, próximos agendamentos) **não é ferramenta**: é carregado antes do agente e injetado no prompt. Isso resolve o caso "mesma profissional da última vez" sem uma chamada extra e sem o agente precisar decidir buscar.
 

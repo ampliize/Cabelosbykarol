@@ -72,11 +72,11 @@ Colocar no ar um agente de IA no WhatsApp do salão que **responde dúvidas e ag
 | F4 | **Consulta de disponibilidade** | Busca horários livres por serviço, profissional (opcional) e período no Belasis. Oferece no máx. 3 opções. |
 | F5 | **Agendamento com confirmação** | Cria o agendamento no Belasis **somente após "sim" explícito** da cliente a um resumo (serviço, profissional, data, hora). |
 | F6 | **Remarcar e cancelar** | Localiza agendamento futuro da cliente e altera/cancela, também com confirmação. Respeita política de antecedência. |
-| F7 | **Transferência para humano** | Por pedido da cliente, reclamação, assunto fora do escopo, ou baixa confiança. Pausa o bot na conversa e notifica a equipe com resumo. |
-| F8 | **Modo "humano assumiu" com devolução automática** | Se alguém da equipe responder manualmente pelo WhatsApp, o bot silencia naquela conversa. Se a equipe ficar X minutos sem falar (padrão 30, reinicia a cada mensagem dela), o agente volta sozinho e responde o que a cliente deixou sem resposta. Reclamações não voltam sozinhas. |
+| F7 | **Encaminhamento ao responsável** | Quando o agente não sabe responder, a cliente pede humano, há reclamação, problema no atendimento ou erro de sistema, a mensagem da cliente + resumo vão para o WhatsApp do responsável. Erros de sistema também alertam a Ampliize. |
+| F8 | **Humano assume com retorno em 3 min** | Se alguém da equipe responder pelo WhatsApp, o agente pausa. Se ninguém da equipe falar por 3 minutos (o tempo reinicia a cada mensagem dela), o agente volta e responde o que ficou pendente. Transferência sem resposta em 3 min: o agente volta e o responsável recebe alerta. Só "não quero robô" não volta sozinho. |
 | F9 | **Áudio e imagem** | Transcreve áudios recebidos; entende imagens (ex.: foto de referência de cabelo) e encaminha a humano quando for pedido de orçamento visual. |
 | F10 | **Agrupamento de mensagens** | Espera a cliente terminar de digitar (janela ~8 s) antes de responder, para não responder frase por frase. |
-| F11 | **Log e painel mínimo** | Todas as conversas, chamadas ao Belasis e transferências registradas (Supabase). Consulta via tabela/SQL no MVP. |
+| F11 | **Dashboard** | Painel web com conversas, % resolvido pelo agente, agendamentos, transferências, % respondidas pela equipe em 3 min, encaminhamentos (entregues ou não), quem está com a equipe agora, motivos, horários de pico, erros e uso de IA. |
 
 ### 5.2 Fase 2 (pós-go-live, P1)
 

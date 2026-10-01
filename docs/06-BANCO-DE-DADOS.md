@@ -1,6 +1,6 @@
 # Banco de dados (Supabase "cabelos by karol")
 
-Migrations em [`supabase/migrations/`](../supabase/migrations) (já aplicadas no projeto). Testes: [`supabase/tests/fluxos.sql`](../supabase/tests/fluxos.sql) (entrada, lote, envio, handoff, idempotência) e [`supabase/tests/retomada.sql`](../supabase/tests/retomada.sql) (devolução automática ao agente, 15 verificações). Ambos usam dados fictícios e não deixam nada gravado.
+Migrations em [`supabase/migrations/`](../supabase/migrations) (já aplicadas no projeto). Testes: [`supabase/tests/fluxos.sql`](../supabase/tests/fluxos.sql) (entrada, lote, envio, handoff, idempotência) [`supabase/tests/retomada.sql`](../supabase/tests/retomada.sql) (devolução automática, 15 verificações) e [`supabase/tests/escalonamento.sql`](../supabase/tests/escalonamento.sql) (3 min, encaminhamento ao responsável e dashboard, 12 verificações). Ambos usam dados fictícios e não deixam nada gravado.
 
 ## Acesso
 
@@ -22,6 +22,8 @@ Migrations em [`supabase/migrations/`](../supabase/migrations) (já aplicadas no
 | `kb_itens` | Base de conhecimento (só `aprovado = true` vai para o bot); busca em português sem acento |
 | `cache_belasis` | Cache das respostas do Belasis |
 | `rate_limit` | Contador por minuto (Belasis 25/min, envio WhatsApp 20/min) |
+| `notificacoes_equipe` | Fila de encaminhamentos ao responsável (tipo, mensagem da cliente, resumo, destinatários, se foi entregue) |
+| `painel_usuarios` | E-mails com acesso ao dashboard |
 | `retomadas_bot` | Log de cada vez que a conversa voltou para o agente (origem, quantas mensagens estavam esperando, id da chamada ao n8n) |
 
 Views: `vw_metricas_diarias`, `vw_handoffs_abertos`, `vw_alertas_escrita_sem_confirmacao` (deve ficar sempre vazia).
@@ -36,19 +38,19 @@ Rotinas pg_cron:
 stateDiagram-v2
     [*] --> bot
     bot --> humano_assumiu: equipe manda mensagem
-    humano_assumiu --> bot: 30 min sem msg da equipe (timer reinicia a cada msg dela)
+    humano_assumiu --> bot: 3 min sem msg da equipe (timer reinicia a cada msg dela)
     bot --> aguardando_humano: agente transfere
     aguardando_humano --> humano_assumiu: equipe responde
-    aguardando_humano --> bot: 60 min sem resposta (exceto reclamação/opt-out)
+    aguardando_humano --> bot: 3 min sem resposta (exceto opt-out) + alerta ao responsável
     humano_assumiu --> bot: /bot
     aguardando_humano --> bot: /bot
 ```
 
-1. Cada mensagem da equipe na conversa (pelo celular ou WhatsApp Web) coloca o bot em pausa e **reinicia** o timer de `devolver_ao_bot_apos_minutos` (padrão **30 min**).
-2. Se a cliente escreve enquanto a equipe está na conversa, o bot continua quieto, mas a equipe ganha **no mínimo** `minutos_tolerancia_resposta_humana` (padrão **5 min**) para responder aquela mensagem.
+1. Cada mensagem da equipe na conversa (pelo celular ou WhatsApp Web) coloca o bot em pausa e **reinicia** o timer de `devolver_ao_bot_apos_minutos` (padrão **3 min**).
+2. Se a cliente escreve enquanto a equipe está na conversa, o bot continua quieto, mas a equipe ganha **no mínimo** `minutos_tolerancia_resposta_humana` (padrão **3 min**) para responder aquela mensagem.
 3. O job `cbk-devolver-conversas` roda a cada minuto. Timer vencido → conversa volta para `bot`, as mensagens da cliente **que ficaram sem resposta** desde a última fala da equipe/bot são reabertas, e o n8n é acionado pelo webhook **`WA · Retomada`** para o agente responder na hora.
 4. Se a cliente escrever antes do job rodar, a devolução acontece na própria entrada (`origem = "retomada"`), já juntando as pendentes no lote.
-5. Depois de uma transferência (`iniciar_handoff`), o agente volta sozinho após `minutos_espera_handoff` (padrão **60 min**) **sem nenhuma resposta da equipe**, exceto nos motivos de `motivos_sem_retorno_automatico` (padrão: reclamação e opt-out), que só voltam com `/bot`.
+5. Depois de uma transferência (`iniciar_handoff`), o agente volta sozinho após `minutos_espera_handoff` (padrão **3 min**) **sem nenhuma resposta da equipe**, exceto nos motivos de `motivos_sem_retorno_automatico` (padrão: só opt-out; reclamação volta em 3 min e o responsável é alertado), que só voltam com `/bot`.
 6. Pendentes com mais de `retomada_max_horas_msg_pendente` (12 h) não são respondidas; fora da janela de 24 h, no piloto fora da whitelist ou com o bot desligado, a conversa volta ao bot mas ninguém é acionado.
 
 **Contexto para o agente na retomada:** `contexto_conversa(conversa_id, 20)` devolve as últimas mensagens **incluindo o que a equipe falou** (a memória do n8n só tem as falas do próprio bot). O `Agente · Core` deve usar isso no prompt quando `origem` for `retomada`, `humano_inativo` ou `handoff_sem_resposta`, para continuar de onde a equipe parou, sem se reapresentar e sem contradizer o que foi combinado.
@@ -111,10 +113,12 @@ Sem isso configurado, tudo funciona igual, só que a resposta às pendentes sai 
 | `bot_ativo` | `true` | Kill switch |
 | `modo_piloto` | `true` | **Mudar para `false` no go-live (08/10)** |
 | `whitelist_piloto` | `[]` | Colocar os números da equipe e das clientes do piloto |
-| `devolver_ao_bot_apos_minutos` | `30` | **Karol decide** (tempo sem a equipe falar para o agente voltar) |
-| `minutos_tolerancia_resposta_humana` | `5` | Tempo mínimo da equipe para responder uma nova msg da cliente |
-| `minutos_espera_handoff` | `60` | Após transferência sem nenhuma resposta da equipe |
-| `motivos_sem_retorno_automatico` | `["reclamacao","opt_out"]` | Esses só voltam com `/bot` |
+| `devolver_ao_bot_apos_minutos` | `3` | Minutos sem a equipe falar para o agente voltar |
+| `minutos_tolerancia_resposta_humana` | `3` | Tempo mínimo da equipe para responder uma nova msg da cliente |
+| `minutos_espera_handoff` | `3` | Após transferência sem nenhuma resposta da equipe → agente volta e o responsável recebe alerta |
+| `motivos_sem_retorno_automatico` | `["opt_out"]` | Só "não quero falar com robô" não volta sozinho (só com `/bot`) |
+| `n8n_webhook_notificacao_url` | `null` | **Preencher**: webhook `Equipe · Notificar` do n8n |
+| `notificacao_max_tentativas` | `3` | Reenvio de encaminhamento que falhou |
 | `retomada_max_horas_msg_pendente` | `12` | |
 | `n8n_webhook_retomada_url` | `null` | **Preencher quando o n8n estiver no ar** (+ segredo no Vault) |
 | `janela_agrupamento_segundos` | `8` | |
@@ -134,3 +138,29 @@ update config_bot set valor = '{"ter":["09:00","19:00"],"qua":["09:00","19:00"],
 insert into equipe (nome, telefone, papel, recebe_handoff) values ('Karol', '5511999990001', 'dona', true);
 update config_bot set valor = 'false' where chave = 'bot_ativo';   -- desliga tudo na hora
 ```
+
+## Encaminhamento ao responsável
+
+Quando o agente **não sabe o que fazer**, quando **algo dá errado** no atendimento ou quando há **erro de sistema**, a mensagem da cliente vai para o WhatsApp do responsável.
+
+| Situação | Quem dispara | Tipo |
+|---|---|---|
+| Agente transfere (cliente pediu, reclamação, orçamento por foto, fora do escopo) | tool `transferir_para_humano` → `iniciar_handoff` | `transferencia` |
+| Agente não tem a resposta | `transferir_para_humano(motivo="incerteza")` | `duvida_agente` |
+| Problema no atendimento sem transferir (ex.: agendamento falhou, cliente confusa) | `encaminhar_para_responsavel('problema_atendimento', …)` | `problema_atendimento` |
+| Erro de sistema (Belasis fora, LLM falhou, WhatsApp caiu) | Error Workflow do n8n → `encaminhar_para_responsavel('erro_sistema', …)` | `erro_sistema` |
+| Ninguém respondeu a transferência em 3 min | automático (cron) | `sem_resposta_humana` |
+
+- Destinatários: `equipe` com `recebe_handoff = true`; erros de sistema também vão para quem tem `recebe_alertas_sistema = true` (ex.: Ampliize).
+- A mensagem leva: tipo, motivo, resumo do agente, as últimas mensagens da cliente, nome e telefone.
+- Entrega: o banco chama o webhook `Equipe · Notificar` (pg_net); o n8n envia no WhatsApp e confirma com `marcar_notificacao(id, true|false, erro)`. Falhou → reenvio automático até 3 vezes. Tudo aparece no dashboard.
+
+```sql
+insert into equipe (nome, telefone, papel, recebe_handoff) values ('Karol', '55119…', 'dona', true);
+insert into equipe (nome, telefone, papel, recebe_alertas_sistema) values ('Ampliize', '55119…', 'ampliize', true);
+update config_bot set valor = '"https://SEU-N8N/webhook/equipe-notificar"' where chave = 'n8n_webhook_notificacao_url';
+```
+
+## Dashboard
+
+Página em [`dashboard/`](../dashboard) que chama `dashboard_dados(dias)` (Hoje / 7 / 30 dias). Acesso só para e-mails em `painel_usuarios`, com login por código no e-mail. Demonstração com dados fictícios: `dashboard/index.html?demo=1`. Instruções em [`dashboard/README.md`](../dashboard/README.md).

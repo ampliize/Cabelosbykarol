@@ -24,7 +24,8 @@ Plano B (**provavelmente desnecessário**: a API expõe `free_times` e criação
 - [ ] Políticas: cancelamento, atraso, sinal, formas de pagamento, endereço, estacionamento, horários
 - [ ] Serviços que **sempre** exigem avaliação presencial/humano
 - [ ] Números da equipe (ignorar / detectar humano assumindo)
-- [ ] Para quem vai a transferência (número ou grupo) e horário de cobertura
+- [ ] Responsável que recebe os encaminhamentos (número) e horário de cobertura
+- [ ] E-mails de quem acessa o dashboard
 - [ ] Volume médio de conversas/mês (para custo)
 - [ ] Aprovação do texto de apresentação do bot
 
@@ -34,7 +35,7 @@ Plano B (**provavelmente desnecessário**: a API expõe `free_times` e criação
 |---|---|---|---|
 | 1 | ~~Canal~~ | ✅ Decidido: API não oficial com regras anti-ban (TRD §2.1); número real só no piloto 07/10 | — |
 | 2 | Bot agenda direto ou só pré-agenda para a recepção confirmar? | Agenda direto com confirmação da cliente | Karol |
-| 3 | Minutos sem a equipe falar para o agente voltar | 30 min (+5 min de tolerância a cada nova msg da cliente; 60 min após transferência sem resposta) | Karol |
+| 3 | ~~Tempo para o agente voltar~~ | ✅ Decidido: 3 min sem resposta da equipe (também após transferência, com alerta ao responsável) | — |
 | 5 | Status do agendamento criado pelo bot: `confirmed` ou `unconfirmed`? | `confirmed` (cliente confirmou no chat) | Karol |
 | 6 | Quais serviços o bot agenda sozinho? | Os marcados como "agendamento online" no Belasis | Karol |
 | 4 | Bot atende fora do horário comercial? | Sim, agenda e avisa que humanos respondem no próximo expediente | Karol |

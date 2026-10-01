@@ -1,0 +1,408 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Painel do Agente</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<style>
+:root {
+  color-scheme: light;
+  --bg: #f4f3ef;
+  --surface-1: #fcfcfb;
+  --border: #e3e1da;
+  --grid: #ecebe6;
+  --text-primary: #0b0b0b;
+  --text-secondary: #52514e;
+  --text-muted: #7a7974;
+  --series-1: #2a78d6;   /* conversas */
+  --series-2: #eb6834;   /* transferências */
+  --series-3: #1baf7a;   /* agendamentos */
+  --seq-0: #f0efec; --seq-1: #cde2fb; --seq-2: #9ec5f4; --seq-3: #6da7ec; --seq-4: #3987e5; --seq-5: #256abf; --seq-6: #184f95;
+  --good: #0ca30c; --warning: #fab219; --serious: #ec835a; --critical: #d03b3b;
+  --accent: #2a78d6;
+}
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) {
+    color-scheme: dark;
+    --bg: #111110; --surface-1: #1a1a19; --border: #2e2e2b; --grid: #262624;
+    --text-primary: #ffffff; --text-secondary: #c3c2b7; --text-muted: #8f8e86;
+    --series-1: #3987e5; --series-2: #d95926; --series-3: #199e70;
+    --seq-0: #383835; --seq-1: #104281; --seq-2: #184f95; --seq-3: #1c5cab; --seq-4: #2a78d6; --seq-5: #5598e7; --seq-6: #9ec5f4;
+    --accent: #3987e5;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #111110; --surface-1: #1a1a19; --border: #2e2e2b; --grid: #262624;
+  --text-primary: #ffffff; --text-secondary: #c3c2b7; --text-muted: #8f8e86;
+  --series-1: #3987e5; --series-2: #d95926; --series-3: #199e70;
+  --seq-0: #383835; --seq-1: #104281; --seq-2: #184f95; --seq-3: #1c5cab; --seq-4: #2a78d6; --seq-5: #5598e7; --seq-6: #9ec5f4;
+  --accent: #3987e5;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text-primary);
+  font: 14px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+.wrap { max-width: 1200px; margin: 0 auto; padding: 20px 16px 48px; }
+header { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+h1 { font-size: 20px; margin: 0; }
+.sub { color: var(--text-secondary); font-size: 13px; }
+.controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.seg { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: var(--surface-1); }
+.seg button { border: 0; background: none; color: var(--text-secondary); padding: 6px 12px; font: inherit; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--accent); color: #fff; }
+.btn { border: 1px solid var(--border); background: var(--surface-1); color: var(--text-primary); padding: 6px 12px; border-radius: 8px; font: inherit; cursor: pointer; }
+.pill { display: inline-flex; gap: 6px; align-items: center; padding: 3px 10px; border-radius: 999px; font-size: 12px; border: 1px solid var(--border); background: var(--surface-1); color: var(--text-secondary); }
+.dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.grid { display: grid; gap: 12px; }
+.kpis { grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); margin-bottom: 12px; }
+.card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; min-width: 0; }
+.card h2 { font-size: 14px; margin: 0 0 2px; }
+.card .desc { color: var(--text-muted); font-size: 12px; margin-bottom: 10px; }
+.kpi .label { color: var(--text-secondary); font-size: 12px; }
+.kpi .value { font-size: 28px; font-weight: 650; letter-spacing: -0.02em; margin-top: 2px; font-variant-numeric: tabular-nums; }
+.kpi .hint { color: var(--text-muted); font-size: 12px; }
+.status { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; color: var(--text-primary); }
+.two { grid-template-columns: 2fr 1fr; margin-bottom: 12px; }
+.half { grid-template-columns: 1fr 1fr; margin-bottom: 12px; }
+@media (max-width: 860px) { .two, .half { grid-template-columns: 1fr; } }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 14px; height: 3px; border-radius: 2px; display: inline-block; }
+svg { display: block; width: 100%; height: auto; overflow: visible; }
+svg text { fill: var(--text-muted); font-size: 11px; font-family: inherit; }
+svg .lbl { fill: var(--text-secondary); font-size: 11px; }
+.tip { position: fixed; pointer-events: none; background: var(--surface-1); color: var(--text-primary); border: 1px solid var(--border);
+  border-radius: 8px; padding: 8px 10px; font-size: 12px; box-shadow: 0 4px 16px rgb(0 0 0 / .12); z-index: 10; display: none; min-width: 140px; }
+.tip b { display: block; margin-bottom: 4px; }
+.tip .row { display: flex; justify-content: space-between; gap: 12px; }
+.tip .row span:first-child { display: inline-flex; gap: 6px; align-items: center; color: var(--text-secondary); }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { text-align: left; color: var(--text-muted); font-weight: 500; font-size: 12px; padding: 6px 8px; border-bottom: 1px solid var(--border); }
+td { padding: 8px; border-bottom: 1px solid var(--grid); vertical-align: top; }
+td.num { text-align: right; font-variant-numeric: tabular-nums; }
+.tablewrap { overflow-x: auto; }
+.empty { color: var(--text-muted); font-size: 13px; padding: 16px 0; text-align: center; }
+.clip { max-width: 320px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+details summary { cursor: pointer; color: var(--text-secondary); font-size: 12px; margin-top: 8px; }
+#login { max-width: 380px; margin: 12vh auto; }
+#login input { width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text-primary); font: inherit; margin: 10px 0; }
+#login .btn { width: 100%; background: var(--accent); color: #fff; border: 0; padding: 10px; }
+.msg { font-size: 13px; color: var(--text-secondary); margin-top: 8px; }
+.banner { border: 1px solid var(--border); border-left: 4px solid var(--warning); background: var(--surface-1); border-radius: 8px; padding: 8px 12px; margin-bottom: 12px; font-size: 13px; }
+</style>
+</head>
+<body>
+<div id="login" class="card" hidden>
+  <h2>Painel do Agente · Cabelos by Karol</h2>
+  <div class="desc">Entre com o e-mail cadastrado. Você vai receber um código.</div>
+  <form id="f-email"><input id="email" type="email" placeholder="seu@email.com" required autocomplete="email"><button class="btn" type="submit">Receber código</button></form>
+  <form id="f-otp" hidden><input id="otp" inputmode="numeric" placeholder="Código de 6 dígitos" required autocomplete="one-time-code"><button class="btn" type="submit">Entrar</button></form>
+  <div class="msg" id="login-msg"></div>
+</div>
+
+<div class="wrap" id="app" hidden>
+  <header>
+    <div>
+      <h1>Atendimento WhatsApp · Cabelos by Karol</h1>
+      <div class="sub" id="sub">Carregando…</div>
+    </div>
+    <div class="controls">
+      <span class="pill" id="pill-bot"></span>
+      <div class="seg" role="group" aria-label="Período">
+        <button data-dias="1">Hoje</button><button data-dias="7" aria-pressed="true">7 dias</button><button data-dias="30">30 dias</button>
+      </div>
+      <button class="btn" id="refresh" title="Atualizar">Atualizar</button>
+      <button class="btn" id="logout" title="Sair">Sair</button>
+    </div>
+  </header>
+
+  <div id="banner"></div>
+  <section class="grid kpis" id="kpis"></section>
+
+  <section class="grid two">
+    <div class="card">
+      <h2>Volume por dia</h2>
+      <div class="desc">Conversas com mensagem da cliente, transferências para a equipe e agendamentos feitos pelo agente.</div>
+      <div class="legend" id="legend-serie"></div>
+      <div id="chart-serie"></div>
+      <details><summary>Ver como tabela</summary><div class="tablewrap" id="table-serie"></div></details>
+    </div>
+    <div class="card">
+      <h2>Por que o agente transferiu</h2>
+      <div class="desc">Motivos das transferências no período.</div>
+      <div id="chart-motivos"></div>
+    </div>
+  </section>
+
+  <section class="grid half">
+    <div class="card">
+      <h2>Agora com a equipe</h2>
+      <div class="desc">Conversas pausadas para humano. O agente reassume quando o tempo acaba.</div>
+      <div class="tablewrap" id="table-agora"></div>
+    </div>
+    <div class="card">
+      <h2>Quando as clientes escrevem</h2>
+      <div class="desc">Mensagens de clientes por dia da semana e hora.</div>
+      <div id="chart-calor"></div>
+    </div>
+  </section>
+
+  <section class="card" style="margin-bottom:12px">
+    <h2>Encaminhamentos ao responsável</h2>
+    <div class="desc">Dúvidas do agente, transferências, problemas e erros enviados ao WhatsApp do responsável.</div>
+    <div class="tablewrap" id="table-enc"></div>
+  </section>
+
+  <section class="grid kpis" id="ops"></section>
+</div>
+<div class="tip" id="tip"></div>
+
+<script>
+const $ = (s) => document.querySelector(s);
+const fmt = new Intl.NumberFormat('pt-BR');
+const pct = (a, b) => b ? Math.round(100 * a / b) + '%' : '—';
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const tip = $('#tip');
+const showTip = (e, html) => { tip.innerHTML = html; tip.style.display = 'block';
+  const x = Math.min(e.clientX + 14, innerWidth - tip.offsetWidth - 8), y = Math.min(e.clientY + 14, innerHeight - tip.offsetHeight - 8);
+  tip.style.left = x + 'px'; tip.style.top = y + 'px'; };
+const hideTip = () => { tip.style.display = 'none'; };
+
+const MOTIVOS = { pedido_cliente: 'Cliente pediu humano', reclamacao: 'Reclamação', fora_escopo: 'Fora do escopo',
+  orcamento_visual: 'Orçamento por foto', erro_sistema: 'Erro de sistema', incerteza: 'Agente sem resposta', opt_out: 'Não quer robô' };
+const TIPOS = { transferencia: 'Transferência', duvida_agente: 'Dúvida do agente', problema_atendimento: 'Problema no atendimento',
+  erro_sistema: 'Erro de sistema', sem_resposta_humana: 'Sem resposta da equipe' };
+const STATUS = { bot: 'Agente', humano_assumiu: 'Equipe atendendo', aguardando_humano: 'Aguardando equipe' };
+const DIAS = ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
+const SERIES = [
+  { key: 'conversas', label: 'Conversas', color: 'var(--series-1)' },
+  { key: 'transferencias', label: 'Transferências', color: 'var(--series-2)' },
+  { key: 'agendamentos', label: 'Agendamentos', color: 'var(--series-3)' },
+];
+const statusTag = (level, text) => {
+  const icon = { good: '✓', warning: '!', serious: '!', critical: '✕' }[level];
+  return `<span class="status"><span class="dot" style="background:var(--${level})"></span>${icon} ${esc(text)}</span>`;
+};
+const hora = (iso) => iso ? new Date(iso).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '—';
+const minutosAte = (iso) => iso ? Math.max(0, Math.round((new Date(iso) - Date.now()) / 60000)) : null;
+
+// ---------------------------------------------------------------- KPIs
+function renderKpis(d) {
+  const k = d.kpis;
+  const noPrazo = k.transferencias ? k.transf_respondidas_no_prazo / k.transferencias : null;
+  const tiles = [
+    { label: 'Conversas', value: fmt.format(k.conversas), hint: `${fmt.format(k.msgs_clientes)} mensagens de clientes` },
+    { label: 'Resolvidas só pelo agente', value: pct(k.resolvidas_pelo_agente, k.conversas), hint: `${fmt.format(k.resolvidas_pelo_agente)} sem equipe` },
+    { label: 'Agendamentos pelo agente', value: fmt.format(k.agendamentos), hint: `${k.remarcacoes} remarcações · ${k.cancelamentos} cancelamentos` },
+    { label: 'Transferências', value: fmt.format(k.transferencias), hint: `${fmt.format(k.retomadas)} vezes o agente reassumiu` },
+    { label: `Equipe respondeu em até ${d.minutos_retorno} min`, value: noPrazo == null ? '—' : Math.round(noPrazo * 100) + '%',
+      hint: k.tempo_resposta_humana_mediana_min == null ? 'sem respostas no período' : `mediana ${k.tempo_resposta_humana_mediana_min} min`,
+      status: noPrazo == null ? null : noPrazo >= .8 ? ['good', 'Bom'] : noPrazo >= .5 ? ['warning', 'Atenção'] : ['critical', 'Crítico'] },
+    { label: 'Encaminhamentos ao responsável', value: fmt.format(k.encaminhamentos),
+      hint: k.encaminhamentos_falhos ? `${k.encaminhamentos_falhos} não entregues` : 'todos entregues',
+      status: k.encaminhamentos_falhos ? ['critical', 'Falha de envio'] : null },
+  ];
+  $('#kpis').innerHTML = tiles.map(t => `<div class="card kpi"><div class="label">${esc(t.label)}</div>
+    <div class="value">${t.value}</div><div class="hint">${esc(t.hint)}</div>${t.status ? statusTag(...t.status) : ''}</div>`).join('');
+
+  const ops = [
+    { label: 'Tempo de resposta do agente', value: k.latencia_agente_p50_ms == null ? '—' : (k.latencia_agente_p50_ms / 1000).toFixed(1) + ' s',
+      hint: k.latencia_agente_p95_ms == null ? 'mediana' : `mediana · 95% abaixo de ${(k.latencia_agente_p95_ms / 1000).toFixed(1)} s` },
+    { label: 'Erros de sistema', value: fmt.format(k.erros_sistema), hint: `${k.erros_belasis} erros na API Belasis`,
+      status: (k.erros_sistema + k.erros_belasis) ? ['serious', 'Verificar'] : ['good', 'Sem erros'] },
+    { label: 'Agendamento sem confirmação', value: fmt.format(k.escritas_sem_confirmacao), hint: 'deve ser sempre zero',
+      status: k.escritas_sem_confirmacao ? ['critical', 'Investigar'] : ['good', 'OK'] },
+    { label: 'Uso de IA (tokens)', value: fmt.format(k.tokens_in + k.tokens_out), hint: `${fmt.format(k.tokens_in)} entrada · ${fmt.format(k.tokens_out)} saída` },
+  ];
+  $('#ops').innerHTML = ops.map(t => `<div class="card kpi"><div class="label">${esc(t.label)}</div>
+    <div class="value">${t.value}</div><div class="hint">${esc(t.hint)}</div>${t.status ? statusTag(...t.status) : ''}</div>`).join('');
+}
+
+// ---------------------------------------------------------------- Linhas por dia
+function renderSerie(rows) {
+  $('#legend-serie').innerHTML = SERIES.map(s => `<span><i style="background:${s.color}"></i>${s.label}</span>`).join('');
+  const W = Math.max(300, $('#chart-serie').clientWidth || 640), H = W < 480 ? 200 : 240, m = { t: 12, r: 92, b: 26, l: 30 };
+  const iw = W - m.l - m.r, ih = H - m.t - m.b;
+  const max = Math.max(1, ...rows.flatMap(r => SERIES.map(s => r[s.key])));
+  const nice = Math.ceil(max / 4) * 4 || 4;
+  const x = (i) => m.l + (rows.length === 1 ? iw / 2 : i * iw / (rows.length - 1));
+  const y = (v) => m.t + ih - (v / nice) * ih;
+  let g = '';
+  for (let i = 0; i <= 4; i++) { const v = nice * i / 4;
+    g += `<line x1="${m.l}" x2="${m.l + iw}" y1="${y(v)}" y2="${y(v)}" stroke="var(--grid)"/>`;
+    g += `<text x="${m.l - 6}" y="${y(v) + 4}" text-anchor="end">${fmt.format(v)}</text>`; }
+  const step = Math.ceil(rows.length / Math.max(3, Math.floor(iw / 60)));
+  rows.forEach((r, i) => { if (i % step === 0 || i === rows.length - 1) {
+    const [yy, mm, dd] = r.dia.split('-'); g += `<text x="${x(i)}" y="${H - 6}" text-anchor="middle">${dd}/${mm}</text>`; } });
+  // rótulos diretos no fim de cada linha, afastados para não colidir
+  const ends = SERIES.map(s => ({ s, v: rows.at(-1)[s.key], y: y(rows.at(-1)[s.key]) })).sort((a, b) => a.y - b.y);
+  for (let i = 1; i < ends.length; i++) if (ends[i].y - ends[i - 1].y < 14) ends[i].y = ends[i - 1].y + 14;
+  SERIES.forEach(s => {
+    const pts = rows.map((r, i) => `${x(i)},${y(r[s.key])}`).join(' ');
+    g += `<polyline points="${pts}" fill="none" stroke="${s.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
+    if (rows.length <= 31) rows.forEach((r, i) => g += `<circle cx="${x(i)}" cy="${y(r[s.key])}" r="3" fill="${s.color}" stroke="var(--surface-1)" stroke-width="2"/>`);
+  });
+  ends.forEach(e => g += `<text class="lbl" x="${m.l + iw + 8}" y="${e.y + 4}">${e.s.label} ${fmt.format(e.v)}</text>`);
+  g += `<line id="cross" x1="0" x2="0" y1="${m.t}" y2="${m.t + ih}" stroke="var(--text-muted)" stroke-dasharray="3 3" visibility="hidden"/>`;
+  g += `<rect id="hit" x="${m.l}" y="${m.t}" width="${iw}" height="${ih}" fill="transparent"/>`;
+  $('#chart-serie').innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Volume diário">${g}</svg>`;
+  const svg = $('#chart-serie svg'), cross = svg.querySelector('#cross');
+  svg.querySelector('#hit').addEventListener('pointermove', (e) => {
+    const pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
+    const p = pt.matrixTransform(svg.getScreenCTM().inverse());
+    const i = Math.max(0, Math.min(rows.length - 1, Math.round((p.x - m.l) / (iw / Math.max(1, rows.length - 1)))));
+    cross.setAttribute('x1', x(i)); cross.setAttribute('x2', x(i)); cross.setAttribute('visibility', 'visible');
+    const r = rows[i], [yy, mm, dd] = r.dia.split('-');
+    showTip(e, `<b>${dd}/${mm}</b>` + SERIES.map(s => `<div class="row"><span><i class="dot" style="background:${s.color}"></i>${s.label}</span><span>${fmt.format(r[s.key])}</span></div>`).join(''));
+  });
+  svg.querySelector('#hit').addEventListener('pointerleave', () => { cross.setAttribute('visibility', 'hidden'); hideTip(); });
+  $('#table-serie').innerHTML = `<table><tr><th>Dia</th>${SERIES.map(s => `<th class="num">${s.label}</th>`).join('')}</tr>` +
+    rows.map(r => `<tr><td>${r.dia.split('-').reverse().slice(0, 2).join('/')}</td>${SERIES.map(s => `<td class="num">${r[s.key]}</td>`).join('')}</tr>`).join('') + '</table>';
+}
+
+// ---------------------------------------------------------------- Barras de motivos
+function renderMotivos(rows) {
+  if (!rows.length) { $('#chart-motivos').innerHTML = '<div class="empty">Nenhuma transferência no período.</div>'; return; }
+  const W = Math.max(240, $('#chart-motivos').clientWidth || 320), bh = 18, gap = 12, H = rows.length * (bh + gap + 14);
+  const max = Math.max(...rows.map(r => r.total));
+  const total = rows.reduce((a, r) => a + r.total, 0);
+  let g = '';
+  rows.forEach((r, i) => {
+    const y0 = i * (bh + gap + 14), w = Math.max(4, (r.total / max) * (W - 60));
+    g += `<text class="lbl" x="0" y="${y0 + 10}">${esc(MOTIVOS[r.motivo] || r.motivo)}</text>`;
+    g += `<rect class="bar" data-i="${i}" x="0" y="${y0 + 14}" width="${w}" height="${bh}" rx="4" fill="var(--series-2)"/>`;
+    g += `<text class="lbl" x="${w + 6}" y="${y0 + 14 + bh - 5}">${r.total}</text>`;
+  });
+  $('#chart-motivos').innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Motivos de transferência">${g}</svg>`;
+  $('#chart-motivos').querySelectorAll('.bar').forEach(el => {
+    el.addEventListener('pointermove', (e) => { const r = rows[el.dataset.i];
+      showTip(e, `<b>${esc(MOTIVOS[r.motivo] || r.motivo)}</b>${r.total} de ${total} (${pct(r.total, total)})`); });
+    el.addEventListener('pointerleave', hideTip);
+  });
+}
+
+// ---------------------------------------------------------------- Mapa de calor
+function renderCalor(rows) {
+  const horas = Array.from({ length: 16 }, (_, i) => i + 7); // 07h–22h
+  const val = {}; let max = 0;
+  rows.forEach(r => { val[`${r.dia_semana}-${r.hora}`] = r.total; max = Math.max(max, r.total); });
+  if (!max) { $('#chart-calor').innerHTML = '<div class="empty">Sem mensagens no período.</div>'; return; }
+  const avail = Math.min(520, $('#chart-calor').clientWidth || 420), l = 30, t = 4, gap = 2;
+  const cw = Math.max(10, Math.floor((avail - l) / horas.length) - gap), ch = Math.min(22, cw), W = l + horas.length * (cw + gap), H = t + 7 * (ch + gap) + 18;
+  const stepColor = (v) => v === 0 ? 'var(--seq-0)' : `var(--seq-${Math.min(6, 1 + Math.floor((v / max) * 5.999))})`;
+  let g = '';
+  DIAS.forEach((d, di) => {
+    g += `<text x="${l - 6}" y="${t + di * (ch + gap) + 13}" text-anchor="end">${d}</text>`;
+    horas.forEach((h, hi) => { const v = val[`${di + 1}-${h}`] || 0;
+      g += `<rect class="cell" data-d="${di}" data-h="${h}" data-v="${v}" x="${l + hi * (cw + gap)}" y="${t + di * (ch + gap)}" width="${cw}" height="${ch}" rx="3" fill="${stepColor(v)}"/>`; });
+    g = g.replace(`y="${t + di * (ch + gap) + 13}"`, `y="${t + di * (ch + gap) + ch / 2 + 4}"`);
+  });
+  horas.forEach((h, hi) => { if (h % 3 === 0) g += `<text x="${l + hi * (cw + gap) + cw / 2}" y="${H - 4}" text-anchor="middle">${h}h</text>`; });
+  $('#chart-calor').innerHTML = `<svg viewBox="0 0 ${W} ${H}" style="max-width:${W}px" role="img" aria-label="Mensagens por dia da semana e hora">${g}</svg>
+    <div class="legend" style="margin-top:6px"><span>menos</span>${[0,1,2,3,4,5,6].map(i => `<i style="width:14px;height:10px;background:var(--seq-${i})"></i>`).join('')}<span>mais (máx. ${max})</span></div>`;
+  $('#chart-calor').querySelectorAll('.cell').forEach(el => {
+    el.addEventListener('pointermove', (e) => showTip(e, `<b>${DIAS[el.dataset.d]} · ${el.dataset.h}h</b>${el.dataset.v} mensagens`));
+    el.addEventListener('pointerleave', hideTip);
+  });
+}
+
+// ---------------------------------------------------------------- Tabelas
+function renderAgora(rows) {
+  if (!rows.length) { $('#table-agora').innerHTML = '<div class="empty">Nenhuma conversa com a equipe agora. O agente está atendendo todas.</div>'; return; }
+  $('#table-agora').innerHTML = `<table><tr><th>Cliente</th><th>Situação</th><th>Motivo</th><th class="num">Agente volta em</th></tr>` +
+    rows.map(r => { const mins = minutosAte(r.pausado_ate);
+      return `<tr><td>${esc(r.nome || r.telefone)}<div class="sub">${esc(r.telefone)}</div></td><td>${esc(STATUS[r.status] || r.status)}</td>
+      <td>${esc(MOTIVOS[r.motivo] || r.motivo || '—')}</td><td class="num">${mins == null ? statusTag('serious', 'só com /bot') : mins + ' min'}</td></tr>`; }).join('') + '</table>';
+}
+function renderEnc(rows) {
+  if (!rows.length) { $('#table-enc').innerHTML = '<div class="empty">Nada encaminhado no período.</div>'; return; }
+  const est = { enviada: ['good', 'Entregue'], pendente: ['warning', 'Pendente'], erro: ['critical', 'Falhou'] };
+  $('#table-enc').innerHTML = `<table><tr><th>Quando</th><th>Tipo</th><th>Cliente</th><th>Mensagem / resumo</th><th>Envio</th></tr>` +
+    rows.map(r => `<tr><td>${hora(r.criado_em)}</td><td>${esc(TIPOS[r.tipo] || r.tipo)}</td><td>${esc(r.nome_cliente || r.telefone_cliente || '—')}</td>
+      <td class="clip" title="${esc(r.resumo || r.mensagem_cliente)}">${esc(r.resumo || r.mensagem_cliente || '—')}</td><td>${statusTag(...(est[r.estado] || ['warning', r.estado]))}</td></tr>`).join('') + '</table>';
+}
+
+let ultimo = null, rz;
+addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => ultimo && render(ultimo), 150); });
+function render(d) {
+  ultimo = d;
+  $('#sub').textContent = `Atualizado ${hora(d.gerado_em)} · últimos ${d.periodo_dias === 1 ? 'hoje' : d.periodo_dias + ' dias'}`;
+  $('#pill-bot').innerHTML = d.bot_ativo
+    ? `<span class="dot" style="background:var(--good)"></span>✓ Agente ligado${d.modo_piloto ? ' · modo piloto' : ''}`
+    : `<span class="dot" style="background:var(--critical)"></span>✕ Agente desligado`;
+  $('#banner').innerHTML = DEMO ? '<div class="banner">Modo demonstração: dados fictícios.</div>' : '';
+  renderKpis(d); renderSerie(d.serie_diaria); renderMotivos(d.motivos_transferencia);
+  renderAgora(d.conversas_com_humano); renderCalor(d.mapa_calor); renderEnc(d.ultimos_encaminhamentos);
+}
+
+// ---------------------------------------------------------------- Dados
+const DEMO = new URLSearchParams(location.search).has('demo') || !window.CBK_CONFIG;
+let dias = 7, sb = null;
+
+function demoData(n) {
+  let seed = 7; const rnd = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
+  const hoje = new Date(); const serie = [];
+  for (let i = n - 1; i >= 0; i--) { const d = new Date(hoje); d.setDate(d.getDate() - i);
+    const c = Math.round(18 + rnd() * 14 + (d.getDay() === 6 ? 10 : 0));
+    serie.push({ dia: d.toISOString().slice(0, 10), conversas: c, transferencias: Math.round(c * (0.12 + rnd() * 0.1)), agendamentos: Math.round(c * (0.25 + rnd() * 0.15)) }); }
+  const conv = serie.reduce((a, r) => a + r.conversas, 0), tr = serie.reduce((a, r) => a + r.transferencias, 0), ag = serie.reduce((a, r) => a + r.agendamentos, 0);
+  const calor = []; for (let d = 1; d <= 7; d++) for (let h = 7; h <= 22; h++) { const base = d === 7 ? 0.2 : 1;
+    const v = Math.round(base * (h >= 9 && h <= 12 ? 6 : h >= 18 && h <= 21 ? 8 : 2) * rnd() * n / 3); if (v) calor.push({ dia_semana: d, hora: h, total: v }); }
+  const em = (min) => new Date(Date.now() + min * 60000).toISOString();
+  return { gerado_em: new Date().toISOString(), periodo_dias: n, bot_ativo: true, modo_piloto: false, minutos_retorno: 3,
+    kpis: { conversas: conv, resolvidas_pelo_agente: Math.round(conv * 0.68), msgs_clientes: conv * 5, msgs_agente: conv * 4, msgs_equipe: tr * 3,
+      transferencias: tr, transf_respondidas_no_prazo: Math.round(tr * 0.72), tempo_resposta_humana_mediana_min: 2.1, retomadas: Math.round(tr * 0.35),
+      encaminhamentos: tr + 4, erros_sistema: 1, encaminhamentos_falhos: 0, agendamentos: ag, remarcacoes: Math.round(ag * 0.15), cancelamentos: Math.round(ag * 0.06),
+      erros_belasis: 2, latencia_agente_p50_ms: 6200, latencia_agente_p95_ms: 14800, tokens_in: conv * 38000, tokens_out: conv * 1600, escritas_sem_confirmacao: 0 },
+    serie_diaria: serie,
+    motivos_transferencia: [{ motivo: 'pedido_cliente', total: Math.round(tr * .35) }, { motivo: 'orcamento_visual', total: Math.round(tr * .25) },
+      { motivo: 'incerteza', total: Math.round(tr * .2) }, { motivo: 'reclamacao', total: Math.round(tr * .12) }, { motivo: 'erro_sistema', total: Math.max(1, Math.round(tr * .08)) }],
+    tipos_encaminhamento: [], mapa_calor: calor,
+    conversas_com_humano: [{ nome: 'Juliana', telefone: '5511990000001', status: 'humano_assumiu', pausado_ate: em(2), motivo: null },
+      { nome: 'Fernanda', telefone: '5511990000002', status: 'aguardando_humano', pausado_ate: em(1), motivo: 'orcamento_visual' }],
+    ultimos_encaminhamentos: [
+      { criado_em: em(-4), tipo: 'duvida_agente', nome_cliente: 'Patrícia', resumo: 'Cliente pergunta se pode fazer progressiva grávida', estado: 'enviada' },
+      { criado_em: em(-26), tipo: 'sem_resposta_humana', nome_cliente: 'Camila', resumo: 'Ninguém respondeu a transferência em 3 min. O agente voltou a atender.', estado: 'enviada' },
+      { criado_em: em(-70), tipo: 'erro_sistema', nome_cliente: null, resumo: 'API Belasis respondeu 503 ao consultar horários', estado: 'enviada' },
+      { criado_em: em(-130), tipo: 'transferencia', nome_cliente: 'Renata', resumo: 'Quer orçamento de mechas com foto de referência', estado: 'enviada' }] };
+}
+
+async function load() {
+  if (DEMO) { render(demoData(dias)); return; }
+  const { data, error } = await sb.rpc('dashboard_dados', { p_dias: dias });
+  if (error) { $('#sub').textContent = error.message.includes('acesso_negado') ? 'Seu e-mail não tem acesso a este painel.' : 'Erro ao carregar: ' + error.message; return; }
+  render(data);
+}
+
+document.querySelectorAll('.seg button').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('.seg button').forEach(x => x.setAttribute('aria-pressed', x === b));
+  dias = +b.dataset.dias; load(); }));
+$('#refresh').addEventListener('click', load);
+setInterval(() => { if (!document.hidden && !$('#app').hidden) load(); }, 60000);
+
+async function start() {
+  if (DEMO) { $('#logout').hidden = true; $('#app').hidden = false; load(); return; }
+  if (!window.supabase || !window.supabase.createClient) {
+    $('#login').hidden = false;
+    $('#login-msg').textContent = 'Não foi possível carregar o Supabase (sem internet ou bloqueio de rede). Tente recarregar.';
+    $('#f-email').hidden = true; return;
+  }
+  sb = supabase.createClient(CBK_CONFIG.supabaseUrl, CBK_CONFIG.supabaseKey);
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) { $('#app').hidden = false; load(); } else { $('#login').hidden = false; }
+  $('#logout').addEventListener('click', async () => { await sb.auth.signOut(); location.reload(); });
+  $('#f-email').addEventListener('submit', async (e) => { e.preventDefault();
+    const { error } = await sb.auth.signInWithOtp({ email: $('#email').value.trim(), options: { shouldCreateUser: false } });
+    $('#login-msg').textContent = error ? 'Não foi possível enviar: ' + error.message : 'Código enviado. Confira seu e-mail.';
+    if (!error) { $('#f-email').hidden = true; $('#f-otp').hidden = false; } });
+  $('#f-otp').addEventListener('submit', async (e) => { e.preventDefault();
+    const { error } = await sb.auth.verifyOtp({ email: $('#email').value.trim(), token: $('#otp').value.trim(), type: 'email' });
+    if (error) { $('#login-msg').textContent = 'Código inválido.'; return; }
+    $('#login').hidden = true; $('#app').hidden = false; load(); });
+}
+start();
+</script>
+</body>
+</html>

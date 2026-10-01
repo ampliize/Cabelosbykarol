@@ -12,6 +12,7 @@ Go-live alvo: **08/10/2026**.
 4. [Plano de entrega e pendências](docs/04-PLANO-DE-ENTREGA.md)
 5. [API Belasis — mapeamento](docs/05-BELASIS-API.md) · [OpenAPI](docs/belasis-api/openapi.json)
 6. [Banco de dados (Supabase)](docs/06-BANCO-DE-DADOS.md) · [migrations](supabase/migrations)
+7. [Dashboard](dashboard/README.md) — demo: `dashboard/index.html?demo=1`
 
 ## Teste rápido da API Belasis
 
