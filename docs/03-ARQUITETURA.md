@@ -87,15 +87,21 @@ sequenceDiagram
 
 ## 3. Estados da conversa
 
+Detalhes e parâmetros em [06-BANCO-DE-DADOS.md › Devolução automática](06-BANCO-DE-DADOS.md#devolução-automática-ao-agente-por-inatividade-da-equipe).
+
 ```mermaid
 stateDiagram-v2
     [*] --> bot
-    bot --> aguardando_humano: transferir_para_humano
-    bot --> humano_assumiu: equipe respondeu pelo celular (from_me)
-    aguardando_humano --> humano_assumiu: equipe respondeu
-    humano_assumiu --> bot: pausado_ate expirou
-    aguardando_humano --> bot: equipe devolve (comando /bot) ou timeout
+    bot --> humano_assumiu: equipe responde pelo celular/WhatsApp Web
+    humano_assumiu --> bot: 30 min sem mensagem da equipe (timer reinicia a cada msg)
+    bot --> aguardando_humano: agente transfere
+    aguardando_humano --> humano_assumiu: equipe responde
+    aguardando_humano --> bot: 60 min sem resposta (exceto reclamação/opt-out)
+    humano_assumiu --> bot: /bot
+    aguardando_humano --> bot: /bot
 ```
+
+Ao voltar, o agente responde as mensagens da cliente que ficaram sem resposta, com o histórico do que a equipe falou no contexto.
 
 ## 4. Workflows n8n
 
@@ -113,7 +119,7 @@ stateDiagram-v2
 | `Belasis · Cliente por telefone` | Sub-workflow | Normaliza telefone, busca, cache |
 | `KB · Pipeline histórico` | Manual | Acquire→prepare→process→parse→render do export do WhatsApp |
 | `Ops · Erros` | Error Trigger | Alerta Ampliize em falhas |
-| `Ops · Reativar bot` | Cron 15 min | Volta conversas `humano_assumiu` expiradas para `bot` |
+| `WA · Retomada` | Webhook (chamado pelo banco) | Recebe a devolução automática e manda o agente responder as pendentes |
 
 ## 5. Pipeline de conhecimento (execução única + reexecuções)
 

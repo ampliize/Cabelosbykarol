@@ -73,7 +73,7 @@ Colocar no ar um agente de IA no WhatsApp do salão que **responde dúvidas e ag
 | F5 | **Agendamento com confirmação** | Cria o agendamento no Belasis **somente após "sim" explícito** da cliente a um resumo (serviço, profissional, data, hora). |
 | F6 | **Remarcar e cancelar** | Localiza agendamento futuro da cliente e altera/cancela, também com confirmação. Respeita política de antecedência. |
 | F7 | **Transferência para humano** | Por pedido da cliente, reclamação, assunto fora do escopo, ou baixa confiança. Pausa o bot na conversa e notifica a equipe com resumo. |
-| F8 | **Modo "humano assumiu"** | Se alguém da equipe responder manualmente pelo WhatsApp, o bot silencia naquela conversa por N horas (configurável). |
+| F8 | **Modo "humano assumiu" com devolução automática** | Se alguém da equipe responder manualmente pelo WhatsApp, o bot silencia naquela conversa. Se a equipe ficar X minutos sem falar (padrão 30, reinicia a cada mensagem dela), o agente volta sozinho e responde o que a cliente deixou sem resposta. Reclamações não voltam sozinhas. |
 | F9 | **Áudio e imagem** | Transcreve áudios recebidos; entende imagens (ex.: foto de referência de cabelo) e encaminha a humano quando for pedido de orçamento visual. |
 | F10 | **Agrupamento de mensagens** | Espera a cliente terminar de digitar (janela ~8 s) antes de responder, para não responder frase por frase. |
 | F11 | **Log e painel mínimo** | Todas as conversas, chamadas ao Belasis e transferências registradas (Supabase). Consulta via tabela/SQL no MVP. |
