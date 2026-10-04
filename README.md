@@ -13,6 +13,7 @@ Go-live alvo: **08/10/2026**.
 5. [API Belasis — mapeamento](docs/05-BELASIS-API.md) · [OpenAPI](docs/belasis-api/openapi.json)
 6. [Banco de dados (Supabase)](docs/06-BANCO-DE-DADOS.md) · [migrations](supabase/migrations)
 7. [Dashboard](dashboard/README.md) — demo: `dashboard/index.html?demo=1`
+8. [Workflows n8n](docs/07-N8N-WORKFLOWS.md)
 
 ## Teste rápido da API Belasis
 
@@ -23,4 +24,4 @@ export BELASIS_TOKEN="bpk_..."   # nunca commitar
 
 ## Stack
 
-n8n · Claude (Anthropic) · Supabase · API Belasis · WhatsApp (API não oficial, uso responsável — ver TRD §2.1)
+n8n · OpenAI · Supabase · API Belasis · WhatsApp via Evolution API (não oficial, uso responsável — ver TRD §2.1) · Dashboard na Vercel
