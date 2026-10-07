@@ -1,0 +1,5 @@
+
+# Dados de clientes (export do WhatsApp) — nunca versionar
+*.zip
+conversas*/
+msgs.json
