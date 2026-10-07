@@ -71,7 +71,7 @@ POST /api/v1/schedule_groups
 {
   "client_id": 123,
   "date": "2026-10-04",
-  "status": "confirmed",
+  "status": "unconfirmed",
   "observation": "Agendado pelo assistente WhatsApp (conversa <conversa_id>)",
   "calendars_attributes": [
     {
@@ -86,7 +86,7 @@ POST /api/v1/schedule_groups
 ```
 
 - `end_hour` = `start_hour` + `duration` do serviço.
-- `status`: `confirmed`, porque a cliente confirmou no chat (**validar com a Karol**; alternativa `unconfirmed`).
+- `status`: **`unconfirmed`** (definido pelo cliente em 07/10: todo agendamento do agente entra NÃO CONFIRMADO e a equipe valida).
 - `observation` identifica que veio do bot → auditoria e filtro no Belasis.
 
 ## 5. Mapeamento final das ferramentas do agente

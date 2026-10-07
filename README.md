@@ -16,6 +16,7 @@ Go-live alvo: **08/10/2026**.
 8. [Workflows n8n](docs/07-N8N-WORKFLOWS.md)
 9. [Belasis — conexão segura (última etapa)](docs/08-BELASIS-CONEXAO-SEGURA.md)
 10. [Belasis — como funciona (pesquisa) e convivência no WhatsApp](docs/09-BELASIS-COMO-FUNCIONA.md)
+11. [Respostas do cliente — o que foi configurado](docs/10-RESPOSTAS-DO-CLIENTE.md)
 
 ## Teste rápido da API Belasis
 

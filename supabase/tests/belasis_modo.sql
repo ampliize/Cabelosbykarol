@@ -67,7 +67,7 @@ begin
   res := res || jsonb_build_object('teste','pre_agendamento_calcula_fim','ok', r->>'hora_fim' = '12:00:00'
         and (select belasis_cliente_id from public.pre_agendamentos where id = (r->>'pre_agendamento_id')::bigint) = 321);
   select count(*) into n from public.notificacoes_equipe where conversa_id = c1 and tipo = 'pre_agendamento'
-     and resumo like 'Lançar no Belasis: Progressiva com Ana — 09/10%às 09:00 até 12:00%';
+     and resumo like 'Pedido: Progressiva com Ana — 09/10%às 09:00 até 12:00%NÃO CONFIRMADO%';
   res := res || jsonb_build_object('teste','pre_agendamento_avisa_equipe','ok', n = 1);
 
   select count(*) filter (where (x->>'ok')::boolean) into n from jsonb_array_elements(res) x;
