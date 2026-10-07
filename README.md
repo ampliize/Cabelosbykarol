@@ -14,6 +14,7 @@ Go-live alvo: **08/10/2026**.
 6. [Banco de dados (Supabase)](docs/06-BANCO-DE-DADOS.md) · [migrations](supabase/migrations)
 7. [Dashboard](dashboard/README.md) — demo: `dashboard/index.html?demo=1`
 8. [Workflows n8n](docs/07-N8N-WORKFLOWS.md)
+9. [Belasis — conexão segura e varredura](docs/08-BELASIS-CONEXAO-SEGURA.md)
 
 ## Teste rápido da API Belasis
 

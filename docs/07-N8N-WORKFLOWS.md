@@ -10,6 +10,8 @@ Instância: `https://n8n-n8n.dgwpoe.easypanel.host` · projeto pessoal **AMPLIIZ
 | CBK · WA Retomada | `VEdtBBXIy11602ms` | Webhook `POST /webhook/cbk-retomada-4m8x2p` (Supabase, header `x-cbk-secret`) | Equipe 3 min sem responder → `coletar_lote` das pendentes → Agente Core |
 | CBK · Equipe Notificar | `f7yiW3F4zrqMyNQL` | Webhook `POST /webhook/cbk-notificar-9t2v6w` (Supabase, header `x-cbk-secret`) | Envia o encaminhamento no WhatsApp de cada destinatário da tabela `equipe` e chama `marcar_notificacao` |
 | CBK · Erros | `gOntxmmecqInqf8c` | Error Trigger | Falha em qualquer workflow CBK → `encaminhar_para_responsavel('erro_sistema', …)` |
+| CBK · Belasis Request | `UgCDVa86CbsBwpwE` | Execute Workflow | Porta única para a API Belasis: trava por modo, 20 req/min, log. Ver [08](08-BELASIS-CONEXAO-SEGURA.md) |
+| CBK · Belasis Varredura | `NDN0IRHvMJdO4wug` | Manual / Webhook `POST /webhook/cbk-belasis-varredura-3h7d` | Raio-x somente leitura do Belasis → `belasis_varreduras` + catálogo |
 
 ## Credenciais (criar no n8n)
 
@@ -18,6 +20,7 @@ Instância: `https://n8n-n8n.dgwpoe.easypanel.host` · projeto pessoal **AMPLIIZ
 | CBK Supabase Postgres | Postgres | Supabase → Connect → Session pooler (host `aws-…pooler.supabase.com`, porta 5432, usuário `postgres.cuofrppbluatjniserio`, SSL on) | Todos os nós Postgres |
 | CBK Evolution API | Header Auth | Name `apikey`, Value = API key da instância | WA Enviar, Equipe Notificar |
 | CBK Webhook Secret | Header Auth | Name `x-cbk-secret`, Value = segredo `n8n_webhook_retomada_secret` do Vault do Supabase | Webhooks Retomada e Notificar |
+| CBK Belasis API | Header Auth | Name `ACCESS-TOKEN`, Value = chave `bpk_...` | Só CBK · Belasis Request |
 | OpenAI account | OpenAI | já existente | Agente Core, transcrição |
 
 > Na criação, o n8n atribuiu automaticamente as credenciais genéricas "Postgres account" e "Header Auth account" (de outro projeto). **Trocar todas** pelas CBK acima antes de ativar.
