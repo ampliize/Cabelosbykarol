@@ -43,7 +43,20 @@ Fonte: 53 conversas exportadas do WhatsApp (03/07 a 07/10/2026, **10.177 mensage
 - O Belasis troca espaços pelo caractere invisível **⠀ (U+2800)**; o banco normaliza antes de comparar.
 - Nenhuma mensagem digitada pela equipe foi classificada como automática (validação nas 5.871 mensagens).
 - Teste no banco: 11/11. Trava nova: o banco recusa regex inválido na lista de padrões.
-- ⚠️ **Bug no Belasis do salão:** o modelo "amanhã temos um encontro marcado" sai com o texto literal **"%SERVIÇO%"** (65 vezes). Corrigir a variável no Belasis.
+- O modelo "amanhã temos um encontro marcado" saiu com o texto literal "%SERVIÇO%" 65 vezes entre 18/09 e 01/10. **Já corrigido pelo salão:** desde 02/10 o nome do serviço aparece certo.
+
+### Configuração atual no Belasis (prints de 08/10)
+
+| Automação | Quando | Observação para o agente |
+|---|---|---|
+| Lembrete "É hoje!" | 3 h antes | só agendamentos **confirmados** |
+| Lembrete "encontro marcado" | 24 h antes | só agendamentos **confirmados** |
+| Aniversário | no dia | "Feliz aniversário… Karol e toda equipe" |
+| Garanta retornos | após o serviço/compra | "hora de renovar o seu …, chama nossa equipe por aqui" → a cliente responde e o agente faz o pré-agendamento |
+| Cuidados (pré e pós-atendimento) | por serviço | só agendamentos confirmados; textos por serviço não enviados |
+| Boas-vindas, avaliação Google, solicitar avaliação, reconquista (90 dias) | — | já reconhecidas |
+
+Como os lembretes só saem para agendamentos **confirmados**, os pré-agendamentos do agente (que entram como NÃO CONFIRMADOS) só recebem lembrete depois que a equipe valida. Isso combina com o fluxo pedido pelo cliente.
 
 ## 5. Equipe e serviços citados (RASCUNHO para o salão validar)
 
@@ -76,5 +89,6 @@ Estão na base de conhecimento como **não aprovados**: o agente não usa até o
 
 - [ ] Validar a tabela de preços e a lista de profissionais (seção 5)
 - [ ] O que significa "Aux" no nome das profissionais
-- [ ] Corrigir o "%SERVIÇO%" no modelo "encontro marcado" do Belasis
-- [ ] Texto da mensagem de aniversário (não veio nos prints)
+- [x] ~~Corrigir o "%SERVIÇO%" no modelo "encontro marcado"~~ (corrigido em 02/10)
+- [x] ~~Texto da mensagem de aniversário~~ (recebido 08/10)
+- [ ] (Opcional) Textos das mensagens de "Cuidados" por serviço
