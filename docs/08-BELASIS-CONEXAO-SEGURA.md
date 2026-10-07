@@ -1,5 +1,7 @@
 # Belasis — conexão segura, sem interferir na operação do salão
 
+> **Esta é a ÚLTIMA etapa do projeto.** Antes dela o agente funciona sem a API (ver [09](09-BELASIS-COMO-FUNCIONA.md)). A infraestrutura abaixo já está pronta e **desligada**; nada é chamado até o fim do projeto.
+
 Objetivo: deixar tudo pronto e ligar o Belasis **em etapas**, cada uma reversível em segundos, começando por um raio-x **somente leitura** de como o sistema do salão está configurado.
 
 ## 1. Onde poderia haver interferência e como está travado

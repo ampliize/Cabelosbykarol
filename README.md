@@ -1,6 +1,6 @@
 # Cabelos by Karol — Agente de IA no WhatsApp integrado ao Belasis
 
-Automação de atendimento no WhatsApp do salão: responde dúvidas, identifica a cliente pelo telefone no Belasis, sugere horários (inclusive com a mesma profissional do último atendimento), agenda/remarca com confirmação e transfere para a equipe quando necessário.
+Agente de IA humanizado no WhatsApp do salão: responde dúvidas, identifica a cliente pelo telefone no Belasis, sugere horários (inclusive com a mesma profissional do último atendimento), agenda/remarca com confirmação e transfere para a equipe quando necessário.
 
 Go-live alvo: **08/10/2026**.
 
@@ -14,7 +14,8 @@ Go-live alvo: **08/10/2026**.
 6. [Banco de dados (Supabase)](docs/06-BANCO-DE-DADOS.md) · [migrations](supabase/migrations)
 7. [Dashboard](dashboard/README.md) — demo: `dashboard/index.html?demo=1`
 8. [Workflows n8n](docs/07-N8N-WORKFLOWS.md)
-9. [Belasis — conexão segura e varredura](docs/08-BELASIS-CONEXAO-SEGURA.md)
+9. [Belasis — conexão segura (última etapa)](docs/08-BELASIS-CONEXAO-SEGURA.md)
+10. [Belasis — como funciona (pesquisa) e convivência no WhatsApp](docs/09-BELASIS-COMO-FUNCIONA.md)
 
 ## Teste rápido da API Belasis
 

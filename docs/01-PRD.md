@@ -21,7 +21,7 @@ Hoje nenhuma dessas fontes é usada de forma automática.
 
 ## 2. Objetivo
 
-Colocar no ar um agente de IA no WhatsApp do salão que **responde dúvidas e agenda/remarca serviços consultando o Belasis em tempo real**, com o tom de voz do salão e passagem para humano quando necessário.
+Colocar no ar um **agente de IA humanizado** no WhatsApp do salão que **responde dúvidas e agenda/remarca serviços consultando o Belasis em tempo real**, com o tom de voz do salão e passagem para humano quando necessário.
 
 ### Exemplo guia (caso principal)
 
@@ -105,7 +105,7 @@ Colocar no ar um agente de IA no WhatsApp do salão que **responde dúvidas e ag
 
 ## 7. Tom de voz
 
-Extraído do histórico real do WhatsApp do salão (ver TRD §4). Diretrizes iniciais: próximo, carinhoso, frases curtas, emojis com moderação (os que a equipe já usa), trata pelo primeiro nome, nunca soa como robô de URA. O agente se apresenta como assistente virtual do salão quando perguntado — não finge ser uma pessoa.
+Extraído do histórico real do WhatsApp do salão (ver TRD §4). Diretrizes iniciais: próximo, carinhoso, frases curtas, emojis com moderação (os que a equipe já usa), trata pelo primeiro nome, nunca soa como robô de URA. **Agente de IA humanizado**: escreve como a recepção, sem menus nem frases de robô, e nunca se descreve como "bot". Se a cliente perguntar diretamente, é honesto que é a assistente de IA do salão e que a equipe acompanha.
 
 ## 8. Requisitos não funcionais
 
