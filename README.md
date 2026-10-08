@@ -17,6 +17,8 @@ Go-live alvo: **08/10/2026**.
 9. [Belasis — conexão segura (última etapa)](docs/08-BELASIS-CONEXAO-SEGURA.md)
 10. [Belasis — como funciona (pesquisa) e convivência no WhatsApp](docs/09-BELASIS-COMO-FUNCIONA.md)
 11. [Respostas do cliente — o que foi configurado](docs/10-RESPOSTAS-DO-CLIENTE.md)
+12. [Análise das conversas](docs/11-ANALISE-CONVERSAS.md)
+13. **[Passo a passo para os testes](docs/12-PASSO-A-PASSO-TESTES.md)**
 
 ## Teste rápido da API Belasis
 
