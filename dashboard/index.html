@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Painel do Agente</title>
+<title>Painel Cabelos by Karol</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 <style>
@@ -96,9 +96,9 @@ details summary { cursor: pointer; color: var(--text-secondary); font-size: 12px
 <body>
 <div id="login" class="card" hidden>
   <h2>Painel do Agente · Cabelos by Karol</h2>
-  <div class="desc">Entre com o e-mail cadastrado. Você vai receber um código.</div>
+  <div class="desc">Entre com o e-mail cadastrado. Você vai receber um link (ou um código) por e-mail.</div>
   <form id="f-email"><input id="email" type="email" placeholder="seu@email.com" required autocomplete="email"><button class="btn" type="submit">Receber código</button></form>
-  <form id="f-otp" hidden><input id="otp" inputmode="numeric" placeholder="Código de 6 dígitos" required autocomplete="one-time-code"><button class="btn" type="submit">Entrar</button></form>
+  <form id="f-otp" hidden><input id="otp" inputmode="numeric" placeholder="Código do e-mail" required autocomplete="one-time-code"><button class="btn" type="submit">Entrar</button></form>
   <div class="msg" id="login-msg"></div>
 </div>
 
@@ -156,6 +156,29 @@ details summary { cursor: pointer; color: var(--text-secondary); font-size: 12px
   </section>
 
   <section class="grid kpis" id="ops"></section>
+
+  <section id="belasis" hidden>
+    <header style="margin-top:28px">
+      <div>
+        <h1 style="font-size:17px">Salão · dados do Belasis</h1>
+        <div class="sub" id="b-sub"></div>
+      </div>
+    </header>
+    <section class="grid kpis" id="b-kpis"></section>
+    <section class="card" style="margin-bottom:12px">
+      <h2>Agendamentos por dia</h2>
+      <div class="desc">Agendamentos ativos no Belasis (sem cancelados). Barras claras são os próximos dias já marcados.</div>
+      <div id="b-dias"></div>
+    </section>
+    <section class="grid half">
+      <div class="card"><h2>Serviços mais agendados</h2><div class="desc">No período, contando cada serviço do agendamento.</div><div id="b-servicos"></div></div>
+      <div class="card"><h2>Atendimentos por profissional</h2><div class="desc">No período.</div><div id="b-prof"></div></div>
+    </section>
+    <section class="grid half">
+      <div class="card"><h2>Agenda ocupada nos próximos dias</h2><div class="desc">% dos horários da grade já ocupados (próximos 7 dias de funcionamento).</div><div id="b-ocup"></div></div>
+      <div class="card"><h2>Pré-agendamentos do agente</h2><div class="desc">Pedidos que a equipe precisa conferir e lançar no Belasis como não confirmados.</div><div class="tablewrap" id="b-pre"></div></div>
+    </section>
+  </section>
 </div>
 <div class="tip" id="tip"></div>
 
@@ -171,9 +194,10 @@ const showTip = (e, html) => { tip.innerHTML = html; tip.style.display = 'block'
 const hideTip = () => { tip.style.display = 'none'; };
 
 const MOTIVOS = { pedido_cliente: 'Cliente pediu humano', reclamacao: 'Reclamação', fora_escopo: 'Fora do escopo',
-  orcamento_visual: 'Orçamento por foto', erro_sistema: 'Erro de sistema', incerteza: 'Agente sem resposta', opt_out: 'Não quer robô' };
+  orcamento_visual: 'Orçamento por foto', erro_sistema: 'Erro de sistema', incerteza: 'Agente sem resposta', opt_out: 'Não quer atendimento automático' };
 const TIPOS = { transferencia: 'Transferência', duvida_agente: 'Dúvida do agente', problema_atendimento: 'Problema no atendimento',
-  erro_sistema: 'Erro de sistema', sem_resposta_humana: 'Sem resposta da equipe' };
+  erro_sistema: 'Erro de sistema', sem_resposta_humana: 'Sem resposta da equipe',
+  pre_agendamento: 'Pré-agendamento', retorno_lembrete: 'Resposta a lembrete' };
 const STATUS = { bot: 'Agente', humano_assumiu: 'Equipe atendendo', aguardando_humano: 'Aguardando equipe' };
 const DIAS = ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
 const SERIES = [
@@ -324,8 +348,65 @@ function renderEnc(rows) {
       <td class="clip" title="${esc(r.resumo || r.mensagem_cliente)}">${esc(r.resumo || r.mensagem_cliente || '—')}</td><td>${statusTag(...(est[r.estado] || ['warning', r.estado]))}</td></tr>`).join('') + '</table>';
 }
 
-let ultimo = null, rz;
-addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => ultimo && render(ultimo), 150); });
+// ---------------------------------------------------------------- Belasis
+function hbars(el, rows, color, valueFmt = (v) => fmt.format(v)) {
+  if (!rows.length) { el.innerHTML = '<div class="empty">Sem dados no período.</div>'; return; }
+  const W = Math.max(240, el.clientWidth || 320), bh = 14, gap = 8, lineH = bh + gap + 14, H = rows.length * lineH;
+  const max = Math.max(...rows.map(r => r.v), 1);
+  let g = '';
+  rows.forEach((r, i) => { const y0 = i * lineH, w = Math.max(3, (r.v / max) * (W - 70));
+    g += `<text class="lbl" x="0" y="${y0 + 10}">${esc(r.label)}</text>`;
+    g += `<rect x="0" y="${y0 + 14}" width="${w}" height="${bh}" rx="3" fill="${color}"/>`;
+    g += `<text class="lbl" x="${w + 6}" y="${y0 + 14 + bh - 3}">${valueFmt(r.v)}</text>`; });
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img">${g}</svg>`;
+}
+function renderBelasis(b) {
+  if (!b) { $('#belasis').hidden = true; return; }
+  $('#belasis').hidden = false;
+  const t = b.totais, p = b.periodo, n7 = b.proximos_7_dias;
+  $('#b-sub').textContent = `Sincronizado ${hora(b.sincronizado_em)}${b.fila_pendente ? ` · sincronizando (${b.fila_pendente} leituras na fila)` : ''} · somente leitura`;
+  const canc = p.agendamentos ? p.cancelados_ou_faltas / p.agendamentos : null;
+  const tiles = [
+    { label: 'Clientes cadastradas', value: fmt.format(t.clientes), hint: `${fmt.format(t.clientes_com_whatsapp)} com celular reconhecível` },
+    { label: 'Agendamentos no período', value: fmt.format(p.agendamentos), hint: `${fmt.format(p.clientes_distintas)} clientes · ${fmt.format(p.clientes_recorrentes)} voltaram 2+ vezes` },
+    { label: 'Cancelados ou faltas', value: canc == null ? '—' : Math.round(canc * 100) + '%', hint: `${fmt.format(p.cancelados_ou_faltas)} no período`,
+      status: canc == null ? null : canc <= .1 ? ['good', 'Baixo'] : canc <= .2 ? ['warning', 'Atenção'] : ['critical', 'Alto'] },
+    { label: 'Próximos 7 dias', value: fmt.format(n7.agendamentos), hint: `${fmt.format(n7.nao_confirmados)} ainda não confirmados` },
+    { label: 'Serviços ativos', value: fmt.format(t.servicos_ativos), hint: `${fmt.format(t.servicos_online)} liberados para agendamento online` },
+    { label: 'Profissionais', value: fmt.format(t.profissionais), hint: b.chamadas_api_24h.erros ? `${b.chamadas_api_24h.erros} erros na API em 24 h` : 'API sem erros em 24 h' },
+  ];
+  $('#b-kpis').innerHTML = tiles.map(x => `<div class="card kpi"><div class="label">${esc(x.label)}</div>
+    <div class="value">${x.value}</div><div class="hint">${esc(x.hint)}</div>${x.status ? statusTag(...x.status) : ''}</div>`).join('');
+
+  // barras por dia
+  const rows = b.por_dia, el = $('#b-dias');
+  const W = Math.max(300, el.clientWidth || 640), H = 200, m = { t: 10, r: 8, b: 24, l: 30 }, iw = W - m.l - m.r, ih = H - m.t - m.b;
+  const max = Math.max(1, ...rows.map(r => r.total)), nice = Math.ceil(max / 4) * 4, bw = iw / rows.length;
+  const hojeStr = new Date().toLocaleDateString('sv-SE', { timeZone: 'America/Maceio' });
+  let g = '';
+  for (let i = 0; i <= 4; i++) { const v = nice * i / 4, y = m.t + ih - (v / nice) * ih;
+    g += `<line x1="${m.l}" x2="${m.l + iw}" y1="${y}" y2="${y}" stroke="var(--grid)"/><text x="${m.l - 6}" y="${y + 4}" text-anchor="end">${v}</text>`; }
+  const step = Math.ceil(rows.length / Math.max(3, Math.floor(iw / 55)));
+  rows.forEach((r, i) => { const h = (r.total / nice) * ih, x = m.l + i * bw + 1, futuro = r.dia > hojeStr;
+    g += `<rect class="bd" data-i="${i}" x="${x}" y="${m.t + ih - h}" width="${Math.max(1, bw - 2)}" height="${h}" rx="2" fill="var(--series-3)" opacity="${futuro ? .45 : 1}"/>`;
+    if (i % step === 0) { const [yy, mm, dd] = r.dia.split('-'); g += `<text x="${x + bw / 2}" y="${H - 6}" text-anchor="middle">${dd}/${mm}</text>`; } });
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Agendamentos por dia">${g}</svg>`;
+  el.querySelectorAll('.bd').forEach(r => { r.addEventListener('pointermove', (e) => { const d = rows[r.dataset.i], [yy, mm, dd] = d.dia.split('-');
+    showTip(e, `<b>${dd}/${mm}${d.dia > hojeStr ? ' (marcado)' : ''}</b>${d.total} agendamentos${d.cancelados ? ` · ${d.cancelados} cancelados` : ''}`); });
+    r.addEventListener('pointerleave', hideTip); });
+
+  hbars($('#b-servicos'), b.top_servicos.map(r => ({ label: r.nome, v: r.total })), 'var(--series-1)');
+  hbars($('#b-prof'), b.por_profissional.map(r => ({ label: r.nome, v: r.total })), 'var(--series-1)');
+  hbars($('#b-ocup'), b.ocupacao_proximos_dias.map(r => ({ label: `${r.nome} · ${r.livres} horários livres`, v: r.ocupacao })), 'var(--series-2)', (v) => v + '%');
+  const pre = b.pre_agendamentos;
+  $('#b-pre').innerHTML = !pre.length ? '<div class="empty">Nenhum pré-agendamento ainda.</div>' :
+    `<table><tr><th>Pedido em</th><th>Serviço</th><th>Para</th><th>Situação</th></tr>` + pre.map(r => `<tr><td>${hora(r.criado_em)}</td>
+      <td>${esc(r.servico)}${r.profissional ? `<div class="sub">${esc(r.profissional)}</div>` : ''}</td><td>${r.data.split('-').reverse().slice(0, 2).join('/')} ${r.hora}</td>
+      <td>${r.estado === 'pendente' ? statusTag('warning', 'Conferir') : statusTag('good', r.estado)}</td></tr>`).join('') + '</table>';
+}
+
+let ultimo = null, ultimoB = null, rz;
+addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => { ultimo && render(ultimo); ultimoB && renderBelasis(ultimoB); }, 150); });
 function render(d) {
   ultimo = d;
   $('#sub').textContent = `Atualizado ${hora(d.gerado_em)} · últimos ${d.periodo_dias === 1 ? 'hoje' : d.periodo_dias + ' dias'}`;
@@ -370,10 +451,12 @@ function demoData(n) {
 }
 
 async function load() {
-  if (DEMO) { render(demoData(dias)); return; }
+  if (DEMO) { render(demoData(dias)); ultimoB = window.CBK_DEMO_BELASIS || null; renderBelasis(ultimoB); return; }
   const { data, error } = await sb.rpc('dashboard_dados', { p_dias: dias });
   if (error) { $('#sub').textContent = error.message.includes('acesso_negado') ? 'Seu e-mail não tem acesso a este painel.' : 'Erro ao carregar: ' + error.message; return; }
   render(data);
+  const rb = await sb.rpc('dashboard_belasis', { p_dias: Math.max(dias, 7) });
+  ultimoB = rb.error ? null : rb.data; renderBelasis(ultimoB);
 }
 
 document.querySelectorAll('.seg button').forEach(b => b.addEventListener('click', () => {
@@ -392,10 +475,11 @@ async function start() {
   sb = supabase.createClient(CBK_CONFIG.supabaseUrl, CBK_CONFIG.supabaseKey);
   const { data: { session } } = await sb.auth.getSession();
   if (session) { $('#app').hidden = false; load(); } else { $('#login').hidden = false; }
+  sb.auth.onAuthStateChange((ev, sess) => { if (ev === 'SIGNED_IN' && sess && $('#app').hidden) { $('#login').hidden = true; $('#app').hidden = false; load(); } });
   $('#logout').addEventListener('click', async () => { await sb.auth.signOut(); location.reload(); });
   $('#f-email').addEventListener('submit', async (e) => { e.preventDefault();
-    const { error } = await sb.auth.signInWithOtp({ email: $('#email').value.trim(), options: { shouldCreateUser: false } });
-    $('#login-msg').textContent = error ? 'Não foi possível enviar: ' + error.message : 'Código enviado. Confira seu e-mail.';
+    const { error } = await sb.auth.signInWithOtp({ email: $('#email').value.trim(), options: { shouldCreateUser: false, emailRedirectTo: location.origin + location.pathname } });
+    $('#login-msg').textContent = error ? 'Não foi possível enviar: ' + error.message : 'Enviamos um e-mail: clique no link ou digite o código abaixo.';
     if (!error) { $('#f-email').hidden = true; $('#f-otp').hidden = false; } });
   $('#f-otp').addEventListener('submit', async (e) => { e.preventDefault();
     const { error } = await sb.auth.verifyOtp({ email: $('#email').value.trim(), token: $('#otp').value.trim(), type: 'email' });
