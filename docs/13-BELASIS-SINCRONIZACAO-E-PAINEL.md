@@ -11,18 +11,31 @@ pg_cron (1x/min) ──► belasis_disparar_sync() ──► Edge Function belas
 
 - **Chave:** só nos segredos das Edge Functions do Supabase (a função usa `BELASIS_ACCESS_TOKEN` ou qualquer segredo cujo valor comece com `bpk_`). Nunca passa pelo n8n, pelo chat nem pelo repositório.
 - **Só leitura:** a função faz apenas `GET`. Escrita no Belasis continua bloqueada (`belasis_modo` = `varredura`).
-- **Rodadas:** completa agora e todo dia às 05:30 (Aracaju). Manual: `select public.belasis_iniciar_sync(120, 45);`
+- **Rodadas automáticas** (o Belasis não tem webhook, então o sistema confere sozinho):
+
+| Rodada | Frequência | O que relê | Mudança aparece no agente em |
+|---|---|---|---|
+| `catalogo` | a cada 15 min | serviços (preço, duração, ativo, categoria) e profissionais | até ~15–20 min |
+| `agenda` | a cada 10 min | agendamentos de −3 a +60 dias | até ~10–15 min |
+| `completa` | todo dia 05:30 (Aracaju) | tudo: catálogo, categorias, quem faz o quê, 4.266 clientes, agenda de −365 a +60 dias, horários livres de 14 dias | dia seguinte |
+
+  Manual: `select public.belasis_iniciar_sync('completa');` (ou `'catalogo'` / `'agenda'`).
+- **Reflexo automático no agente:** o agente não guarda cópia própria; `consultar_servicos` e `perfil_cliente_belasis` leem as tabelas na hora. Novo profissional, preço alterado, serviço desativado ou agendamento cancelado entram sozinhos na próxima rodada.
+- **O que some do Belasis some do agente:** ao fim de cada rodada sem erro (`belasis_finalizar_rodadas`), serviço/profissional que não veio mais fica `ativo = false` e agendamento apagado vira `removido`. Se alguma página falhar, nada é desativado naquela rodada (por segurança).
+- **Histórico das rodadas:** `select tipo, iniciada_em, finalizada_em, resumo from belasis_rodadas order by iniciada_em desc limit 10;`
 - **Desligar tudo:** `update config_bot set valor = '"desligado"' where chave = 'belasis_modo';`
 - **Log:** cada GET fica em `belasis_chamadas` (rota, status, tempo — sem conteúdo).
 
 | Tabela | O que guarda |
 |---|---|
-| `belasis_servicos` | catálogo: nome, preço de tabela, duração (min), ativo, agendamento online |
-| `belasis_profissionais` | nome, apelido (Paty, Lari, Eli, Thais) |
+| `belasis_servicos` | catálogo: nome, preço de tabela, duração (min), ativo, agendamento online, favorito, categoria |
+| `belasis_grupos` | categorias do catálogo |
+| `belasis_profissionais` | nome, apelido do Belasis, profissão, ativo, apelido curto (Paty, Lari, Eli, Thais) |
 | `belasis_profissional_servicos` | cadastro "quem faz o quê" do Belasis |
 | `belasis_clientes` | primeiro nome, telefones normalizados, aniversário (sem CPF, e-mail ou endereço) |
-| `belasis_agendamentos` | −120 a +45 dias: cliente, data, status, serviços, profissional, horários |
-| `belasis_horarios_livres` | grade dos próximos 7 dias de funcionamento por profissional |
+| `belasis_agendamentos` | −365 a +60 dias: cliente, data, status, serviços, profissional, horários |
+| `belasis_horarios_livres` | grade dos próximos 14 dias de funcionamento por profissional |
+| `belasis_rodadas` | cada rodada de sincronização e seu resumo |
 
 ### Descobertas nos dados reais (10/10/2026)
 
