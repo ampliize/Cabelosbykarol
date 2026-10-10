@@ -40,6 +40,7 @@ pg_cron (1x/min) ──► belasis_disparar_sync() ──► Edge Function belas
 ### Descobertas nos dados reais (10/10/2026)
 
 - **4.266 clientes**, 4.029 com celular reconhecível; 140 serviços ativos (46 com agendamento online); 16 profissionais.
+- **Rodada completa v2 (10/10/2026): 299 leituras, 0 erros.** 85 profissionais no histórico (16 ativas), 16 categorias, 6.948 agendamentos (out/2025 a dez/2026): **6.064 atendimentos em 12 meses, 1.156 clientes diferentes**.
 - **591 agendamentos em 30 dias**, 11% cancelados/faltas, 124 clientes voltaram 2+ vezes.
 - A API devolve **duração em segundos** (a documentação diz minutos) — já corrigido.
 - O cadastro "serviços por profissional" do Belasis não bate com a prática; o agente usa **quem de fato realizou** o serviço nos últimos 120 dias.
