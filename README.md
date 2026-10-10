@@ -19,6 +19,7 @@ Go-live alvo: **08/10/2026**.
 11. [Respostas do cliente — o que foi configurado](docs/10-RESPOSTAS-DO-CLIENTE.md)
 12. [Análise das conversas](docs/11-ANALISE-CONVERSAS.md)
 13. **[Passo a passo para os testes](docs/12-PASSO-A-PASSO-TESTES.md)**
+14. [Belasis → Supabase e publicação do painel](docs/13-BELASIS-SINCRONIZACAO-E-PAINEL.md)
 
 ## Teste rápido da API Belasis
 
