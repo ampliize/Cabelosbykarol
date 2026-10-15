@@ -402,7 +402,7 @@ function renderBelasis(b) {
   $('#b-pre').innerHTML = !pre.length ? '<div class="empty">Nenhum pré-agendamento ainda.</div>' :
     `<table><tr><th>Pedido em</th><th>Serviço</th><th>Para</th><th>Situação</th></tr>` + pre.map(r => `<tr><td>${hora(r.criado_em)}</td>
       <td>${esc(r.servico)}${r.profissional ? `<div class="sub">${esc(r.profissional)}</div>` : ''}</td><td>${r.data.split('-').reverse().slice(0, 2).join('/')} ${r.hora}</td>
-      <td>${r.estado === 'pendente' ? statusTag('warning', 'Conferir') : statusTag('good', r.estado)}</td></tr>`).join('') + '</table>';
+      <td>${statusTag(...({ pendente: ['warning', 'Lançar no Belasis'], lancado: ['good', 'Lançado no Belasis'], recusado: ['critical', 'Recusado'], cancelado: ['serious', 'Cancelado'] }[r.estado] || ['warning', r.estado]))}</td></tr>`).join('') + '</table>';
 }
 
 let ultimo = null, ultimoB = null, rz;
