@@ -13,11 +13,18 @@ pg_cron (1x/min) ──► belasis_disparar_sync() ──► Edge Function belas
 - **Só leitura:** a função faz apenas `GET`. Escrita no Belasis continua bloqueada (`belasis_modo` = `varredura`).
 - **Rodadas automáticas** (o Belasis não tem webhook, então o sistema confere sozinho):
 
-| Rodada | Frequência | O que relê | Mudança aparece no agente em |
+| Rodada | Frequência | O que relê | Mudança aparece em |
 |---|---|---|---|
-| `catalogo` | a cada 15 min | serviços (preço, duração, ativo, categoria) e profissionais | até ~15–20 min |
-| `agenda` | a cada 10 min | agendamentos de −3 a +60 dias | até ~10–15 min |
-| `completa` | todo dia 05:30 (Aracaju) | tudo: catálogo, categorias, quem faz o quê, 4.266 clientes, agenda de −365 a +60 dias, horários livres de 14 dias | dia seguinte |
+| `agora` | a cada 2 min | agenda de ontem a +2 dias | ~2–4 min |
+| `agenda` | a cada 10 min | agenda de −30 a +90 dias | ~10–12 min |
+| `catalogo` | a cada 15 min | serviços, preços, categorias, profissionais | ~15–17 min |
+| `livres` | a cada 30 min | horários livres de hoje a +4 dias (só quem atende) | ~30 min |
+| `clientes` | a cada hora | cadastro de clientes (nome, celular, aniversário) | até 1 h |
+| `completa` | 1x por dia (05:30) | tudo, com agenda de 1 ano e 16 dias de horários | dia seguinte |
+
+O Belasis não tem webhook; "tempo real" aqui é leitura frequente, dentro do limite de 30 leituras/min (uso médio ≈ 5/min). A fila atende primeiro a agenda do dia.
+
+**Números do painel (23/10):** ocupação = tempo agendado ÷ (tempo agendado + tempo livre), sem contar folgas (antes folga aparecia como 100% ocupada); "profissionais" = quem fez ≥ 5 atendimentos em 60 dias; agendamento apagado no Belasis não entra no total. A API só tem os status `confirmed` e `disconfirm` (cancelado/faltou/remarcado) — conferido contra a API: 723 × 724 agendamentos em −30/+60 dias.
 
   Manual: `select public.belasis_iniciar_sync('completa');` (ou `'catalogo'` / `'agenda'`).
 - **Reflexo automático no agente:** o agente não guarda cópia própria; `consultar_servicos` e `perfil_cliente_belasis` leem as tabelas na hora. Novo profissional, preço alterado, serviço desativado ou agendamento cancelado entram sozinhos na próxima rodada.
