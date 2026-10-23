@@ -175,7 +175,7 @@ details summary { cursor: pointer; color: var(--text-secondary); font-size: 12px
       <div class="card"><h2>Atendimentos por profissional</h2><div class="desc">No período.</div><div id="b-prof"></div></div>
     </section>
     <section class="grid half">
-      <div class="card"><h2>Agenda ocupada nos próximos dias</h2><div class="desc">% dos horários da grade já ocupados (próximos 7 dias de funcionamento).</div><div id="b-ocup"></div></div>
+      <div class="card"><h2>Agenda ocupada nos próximos dias</h2><div class="desc">% do tempo de trabalho de cada profissional já agendado nos próximos 7 dias. Folgas não entram na conta.</div><div id="b-ocup"></div></div>
       <div class="card"><h2>Pré-agendamentos do agente</h2><div class="desc">Pedidos que a equipe precisa conferir e lançar no Belasis como não confirmados.</div><div class="tablewrap" id="b-pre"></div></div>
     </section>
   </section>
@@ -397,7 +397,7 @@ function renderBelasis(b) {
 
   hbars($('#b-servicos'), b.top_servicos.map(r => ({ label: r.nome, v: r.total })), 'var(--series-1)');
   hbars($('#b-prof'), b.por_profissional.map(r => ({ label: r.nome, v: r.total })), 'var(--series-1)');
-  hbars($('#b-ocup'), b.ocupacao_proximos_dias.map(r => ({ label: `${r.nome} · ${r.livres} horários livres`, v: r.ocupacao })), 'var(--series-2)', (v) => v + '%');
+  hbars($('#b-ocup'), b.ocupacao_proximos_dias.map(r => ({ label: `${r.nome} · ${String(r.livres_h ?? 0).replace(".", ",")}h livres na semana`, v: r.ocupacao })), 'var(--series-2)', (v) => v + '%');
   const pre = b.pre_agendamentos;
   $('#b-pre').innerHTML = !pre.length ? '<div class="empty">Nenhum pré-agendamento ainda.</div>' :
     `<table><tr><th>Pedido em</th><th>Serviço</th><th>Para</th><th>Situação</th></tr>` + pre.map(r => `<tr><td>${hora(r.criado_em)}</td>
