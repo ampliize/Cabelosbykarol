@@ -42,6 +42,7 @@
   --accent: #3987e5;
 }
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 body { margin: 0; background: var(--bg); color: var(--text-primary);
   font: 14px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
 .wrap { max-width: 1200px; margin: 0 auto; padding: 20px 16px 48px; }
@@ -61,7 +62,7 @@ h1 { font-size: 20px; margin: 0; }
 .card h2 { font-size: 14px; margin: 0 0 2px; }
 .card .desc { color: var(--text-muted); font-size: 12px; margin-bottom: 10px; }
 .kpi .label { color: var(--text-secondary); font-size: 12px; }
-.kpi .value { font-size: 28px; font-weight: 650; letter-spacing: -0.02em; margin-top: 2px; font-variant-numeric: tabular-nums; }
+.kpi .value { font-size: clamp(20px, 2.1vw, 28px); overflow-wrap: anywhere; font-weight: 650; letter-spacing: -0.02em; margin-top: 2px; font-variant-numeric: tabular-nums; }
 .kpi .hint { color: var(--text-muted); font-size: 12px; }
 .status { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; color: var(--text-primary); }
 .two { grid-template-columns: 2fr 1fr; margin-bottom: 12px; }
@@ -91,6 +92,43 @@ details summary { cursor: pointer; color: var(--text-secondary); font-size: 12px
 #login .btn { width: 100%; background: var(--accent); color: #fff; border: 0; padding: 10px; }
 .msg { font-size: 13px; color: var(--text-secondary); margin-top: 8px; }
 .banner { border: 1px solid var(--border); border-left: 4px solid var(--warning); background: var(--surface-1); border-radius: 8px; padding: 8px 12px; margin-bottom: 12px; font-size: 13px; }
+
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin: 0 0 16px; overflow-x: auto; }
+.tabs button { border: 0; background: none; color: var(--text-secondary); padding: 10px 14px; font: inherit; font-weight: 600; cursor: pointer;
+  border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap; }
+.tabs button[aria-selected="true"] { color: var(--text-primary); border-bottom-color: var(--accent); }
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; }
+.toolbar label { font-size: 12px; color: var(--text-secondary); display: inline-flex; gap: 6px; align-items: center; }
+.toolbar input, .toolbar select { border: 1px solid var(--border); background: var(--surface-1); color: var(--text-primary);
+  border-radius: 8px; padding: 6px 8px; font: inherit; max-width: 100%; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.chip { background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px; padding: 8px 12px; min-width: 120px; }
+.chip b { display: block; font-size: 20px; font-variant-numeric: tabular-nums; }
+.chip span { font-size: 12px; color: var(--text-secondary); }
+.agwrap { overflow: auto; border: 1px solid var(--border); border-radius: 12px; background: var(--surface-1); max-height: 78vh; }
+.ag { display: grid; position: relative; min-width: max-content; }
+.ag .hcol { position: sticky; left: 0; z-index: 3; background: var(--surface-1); border-right: 1px solid var(--border); }
+.ag .head { position: sticky; top: 0; z-index: 2; background: var(--surface-1); border-bottom: 1px solid var(--border);
+  font-size: 12px; font-weight: 600; padding: 8px 6px; height: 34px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ag .corner { position: sticky; top: 0; left: 0; z-index: 4; background: var(--surface-1); border-bottom: 1px solid var(--border); border-right: 1px solid var(--border); height: 34px; }
+.ag .col { position: relative; border-right: 1px solid var(--grid); }
+.ag .tick { position: absolute; left: 0; right: 0; border-top: 1px solid var(--grid); }
+.ag .tick.h { border-top-color: var(--border); }
+.ag .tl { position: absolute; right: 6px; font-size: 11px; color: var(--text-muted); transform: translateY(-50%); }
+.ev { position: absolute; border-radius: 6px; padding: 3px 6px; font-size: 11px; line-height: 1.25; overflow: hidden; cursor: default;
+  border-left: 3px solid; background: var(--surface-1); box-shadow: 0 0 0 1px var(--border) inset; }
+.ev b { display: block; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ev span { color: var(--text-secondary); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ev.st-confirmed { border-left-color: var(--good); background: color-mix(in srgb, var(--good) 10%, var(--surface-1)); }
+.ev.st-unconfirmed { border-left-color: var(--warning); background: color-mix(in srgb, var(--warning) 14%, var(--surface-1)); }
+.ev.st-waiting { border-left-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, var(--surface-1)); }
+.ev.st-disconfirm { border-left-color: var(--text-muted); opacity: .55; }
+.ev.st-disconfirm b { text-decoration: line-through; }
+.ev .ia { display: inline-block; font-size: 10px; font-weight: 700; color: #fff; background: var(--series-1); border-radius: 4px; padding: 0 4px; margin-left: 4px; }
+.nowline { position: absolute; left: 0; right: 0; border-top: 2px solid var(--critical); z-index: 1; pointer-events: none; }
+th.sort { cursor: pointer; user-select: none; }
+th.sort::after { content: ' ↕'; color: var(--text-muted); font-size: 10px; }
+.bar { height: 6px; border-radius: 3px; background: var(--series-1); margin-top: 4px; }
 </style>
 </head>
 <body>
@@ -118,7 +156,14 @@ details summary { cursor: pointer; color: var(--text-secondary); font-size: 12px
     </div>
   </header>
 
+  <nav class="tabs" role="tablist" aria-label="Seções">
+    <button role="tab" data-tab="atendimento" aria-selected="true">Atendimento WhatsApp</button>
+    <button role="tab" data-tab="agenda" aria-selected="false">Agenda do salão</button>
+    <button role="tab" data-tab="ranking" aria-selected="false">Ranking</button>
+    <button role="tab" data-tab="salao" aria-selected="false">Indicadores do salão</button>
+  </nav>
   <div id="banner"></div>
+  <div id="tab-atendimento">
   <section class="grid kpis" id="kpis"></section>
 
   <section class="grid two">
@@ -156,9 +201,48 @@ details summary { cursor: pointer; color: var(--text-secondary); font-size: 12px
   </section>
 
   <section class="grid kpis" id="ops"></section>
+  </div>
+
+  <div id="tab-agenda" hidden>
+    <div class="toolbar">
+      <button class="btn" id="ag-prev" aria-label="Dia anterior">◀</button>
+      <input type="date" id="ag-dia" aria-label="Dia">
+      <button class="btn" id="ag-next" aria-label="Próximo dia">▶</button>
+      <button class="btn" id="ag-hoje">Hoje</button>
+      <div class="seg" role="group" aria-label="Visualização">
+        <button data-vis="grade" aria-pressed="true">Grade do dia</button><button data-vis="lista">Lista por período</button>
+      </div>
+      <label id="ag-ate-wrap" hidden>até <input type="date" id="ag-ate"></label>
+      <label>Profissional <select id="ag-prof"><option value="">Todas</option></select></label>
+      <label>Situação <select id="ag-status">
+        <option value="">Todas</option><option value="confirmed">Confirmados</option><option value="unconfirmed">Não confirmados</option>
+        <option value="waiting">Cliente chegou</option><option value="disconfirm">Cancelados ou faltas</option></select></label>
+    </div>
+    <div class="sub" id="ag-sub" style="margin-bottom:8px"></div>
+    <div class="chips" id="ag-chips"></div>
+    <div id="ag-view"></div>
+  </div>
+
+  <div id="tab-ranking" hidden>
+    <div class="toolbar">
+      <div class="seg" role="group" aria-label="Período do ranking" id="rk-presets">
+        <button data-rk="7">7 dias</button><button data-rk="30" aria-pressed="true">30 dias</button><button data-rk="mes">Este mês</button><button data-rk="mesant">Mês passado</button><button data-rk="90">90 dias</button>
+      </div>
+      <label>de <input type="date" id="rk-ini"></label>
+      <label>até <input type="date" id="rk-fim"></label>
+    </div>
+    <div class="sub" style="margin-bottom:8px">Faturamento estimado pela tabela de preços do Belasis (a API não informa o valor cobrado). Cancelados e faltas não entram.</div>
+    <section class="grid kpis" id="rk-kpis"></section>
+    <section class="card" style="margin-bottom:12px"><h2>Profissionais</h2><div class="desc">Clique no título da coluna para ordenar.</div><div class="tablewrap" id="rk-prof"></div></section>
+    <section class="grid half">
+      <div class="card"><h2>Serviços</h2><div class="desc">Os 25 mais feitos no período.</div><div class="tablewrap" id="rk-serv"></div></div>
+      <div class="card"><h2>Categorias</h2><div class="desc">Do catálogo do Belasis.</div><div class="tablewrap" id="rk-cat"></div></div>
+    </section>
+    <section class="card" style="margin-bottom:12px"><h2>Clientes que mais voltaram</h2><div class="desc">Top 30 no período, até hoje.</div><div class="tablewrap" id="rk-cli"></div></section>
+  </div>
 
   <section id="belasis" hidden>
-    <header style="margin-top:28px">
+    <header style="margin-top:4px">
       <div>
         <h1 style="font-size:17px">Salão · dados do Belasis</h1>
         <div class="sub" id="b-sub"></div>
@@ -176,7 +260,7 @@ details summary { cursor: pointer; color: var(--text-secondary); font-size: 12px
     </section>
     <section class="grid half">
       <div class="card"><h2>Agenda ocupada nos próximos dias</h2><div class="desc">% do tempo de trabalho de cada profissional já agendado nos próximos 7 dias. Folgas não entram na conta.</div><div id="b-ocup"></div></div>
-      <div class="card"><h2>Pré-agendamentos do agente</h2><div class="desc">Pedidos que a equipe precisa conferir e lançar no Belasis como não confirmados.</div><div class="tablewrap" id="b-pre"></div></div>
+      <div class="card"><h2>Pré-agendamentos do agente</h2><div class="desc">Pedidos feitos pelo WhatsApp. Entram sozinhos no Belasis como não confirmados; a equipe confere e confirma.</div><div class="tablewrap" id="b-pre"></div></div>
     </section>
   </section>
 </div>
@@ -362,7 +446,7 @@ function hbars(el, rows, color, valueFmt = (v) => fmt.format(v)) {
 }
 function renderBelasis(b) {
   if (!b) { $('#belasis').hidden = true; return; }
-  $('#belasis').hidden = false;
+  $('#belasis').hidden = aba !== 'salao';
   const t = b.totais, p = b.periodo, n7 = b.proximos_7_dias;
   $('#b-sub').textContent = `Sincronizado ${hora(b.sincronizado_em)}${b.fila_pendente ? ` · sincronizando (${b.fila_pendente} leituras na fila)` : ''} · somente leitura`;
   const canc = p.agendamentos ? p.cancelados_ou_faltas / p.agendamentos : null;
@@ -402,8 +486,177 @@ function renderBelasis(b) {
   $('#b-pre').innerHTML = !pre.length ? '<div class="empty">Nenhum pré-agendamento ainda.</div>' :
     `<table><tr><th>Pedido em</th><th>Serviço</th><th>Para</th><th>Situação</th></tr>` + pre.map(r => `<tr><td>${hora(r.criado_em)}</td>
       <td>${esc(r.servico)}${r.profissional ? `<div class="sub">${esc(r.profissional)}</div>` : ''}</td><td>${r.data.split('-').reverse().slice(0, 2).join('/')} ${r.hora}</td>
-      <td>${statusTag(...({ pendente: ['warning', 'Lançar no Belasis'], lancado: ['good', 'Lançado no Belasis'], recusado: ['critical', 'Recusado'], cancelado: ['serious', 'Cancelado'] }[r.estado] || ['warning', r.estado]))}</td></tr>`).join('') + '</table>';
+      <td>${r.escrita === 'falhou' ? statusTag('critical', 'Não entrou: lançar manual') + `<div class="sub clip" title="${esc(r.erro)}">${esc(r.erro)}</div>`
+          : r.escrita === 'na_fila' ? statusTag('warning', 'Enviando ao Belasis…')
+          : statusTag(...({ pendente: ['warning', 'Lançar no Belasis'], lancado: ['good', 'No Belasis (não confirmado)'], recusado: ['critical', 'Recusado'], cancelado: ['serious', 'Cancelado'] }[r.estado] || ['warning', r.estado]))}</td></tr>`).join('') + '</table>';
 }
+
+
+// ---------------------------------------------------------------- Abas
+const hojeISO = () => new Date().toLocaleDateString('sv-SE', { timeZone: 'America/Maceio' });
+const addDias = (iso, n) => { const d = new Date(iso + 'T12:00:00'); d.setDate(d.getDate() + n); return d.toLocaleDateString('sv-SE'); };
+const brl = (v) => v == null ? '—' : v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 });
+const ddmm = (iso) => iso ? iso.split('-').reverse().slice(0, 2).join('/') : '—';
+const DIA_SEM = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'];
+const ST = { confirmed: 'Confirmado', unconfirmed: 'Não confirmado', waiting: 'Cliente chegou', disconfirm: 'Cancelado ou faltou' };
+const ST_TAG = { confirmed: 'good', unconfirmed: 'warning', waiting: 'good', disconfirm: 'serious' };
+let aba = 'atendimento';
+try { aba = localStorage.getItem('cbk_aba') || 'atendimento'; } catch (e) {}
+function mostrarAba(t) {
+  aba = t; try { localStorage.setItem('cbk_aba', t); } catch (e) {}
+  document.querySelectorAll('.tabs button').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === t));
+  $('#tab-atendimento').hidden = t !== 'atendimento';
+  $('#tab-agenda').hidden = t !== 'agenda';
+  $('#tab-ranking').hidden = t !== 'ranking';
+  $('#belasis').hidden = t !== 'salao' || !ultimoB;
+  document.querySelector('.seg[aria-label="Período"]').style.visibility = (t === 'atendimento' || t === 'salao') ? 'visible' : 'hidden';
+  if (t === 'agenda') carregarAgenda(); else if (t === 'ranking') carregarRanking(); else if (t === 'salao' && ultimoB) renderBelasis(ultimoB);
+}
+document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => mostrarAba(b.dataset.tab)));
+
+// ---------------------------------------------------------------- Agenda (réplica do Belasis)
+const ag = { dia: hojeISO(), ate: addDias(hojeISO(), 6), vis: 'grade', prof: '', status: '', dados: null };
+$('#ag-dia').value = ag.dia; $('#ag-ate').value = ag.ate;
+const minutos = (h) => { const [a, b] = String(h || '0:0').split(':').map(Number); return a * 60 + (b || 0); };
+
+async function carregarAgenda() {
+  if (!DEMO && (!sb || $('#app').hidden)) return;
+  const ini = ag.dia, fim = ag.vis === 'grade' ? ag.dia : (ag.ate < ag.dia ? ag.dia : ag.ate);
+  if (DEMO) { ag.dados = window.CBK_DEMO_AGENDA || { profissionais: [], itens: [] }; renderAgenda(); return; }
+  $('#ag-sub').textContent = 'Carregando…';
+  const { data, error } = await sb.rpc('dashboard_agenda', { p_ini: ini, p_fim: fim, p_profissional: ag.prof ? +ag.prof : null, p_status: ag.status || null });
+  if (error) { $('#ag-sub').textContent = 'Erro ao carregar a agenda: ' + error.message; return; }
+  ag.dados = data; renderAgenda();
+}
+function renderAgenda() {
+  const d = ag.dados; if (!d) return;
+  const sel = $('#ag-prof'), atual = sel.value;
+  sel.innerHTML = '<option value="">Todas</option>' + d.profissionais.map(p => `<option value="${p.id}">${esc(p.nome)}</option>`).join('');
+  sel.value = atual;
+  const itens = d.itens, grupos = new Set(itens.map(i => i.id));
+  const conta = (st) => new Set(itens.filter(i => i.status === st).map(i => i.id)).size;
+  const fat = itens.filter(i => i.status !== 'disconfirm').reduce((a, i) => a + (i.preco || 0), 0);
+  const ia = new Set(itens.filter(i => i.ia).map(i => i.id)).size;
+  const dt = new Date(ag.dia + 'T12:00:00');
+  $('#ag-sub').textContent = (ag.vis === 'grade' ? `${DIA_SEM[dt.getDay()]}, ${ddmm(ag.dia)}` : `${ddmm(ag.dia)} a ${ddmm(ag.ate)}`)
+    + ` · sincronizado com o Belasis às ${hora(d.sincronizado_em).split(' ').pop()} · atualiza sozinho a cada minuto`;
+  $('#ag-chips').innerHTML = [
+    [grupos.size, 'agendamentos'], [conta('confirmed'), 'confirmados'], [conta('unconfirmed'), 'não confirmados'],
+    [conta('disconfirm'), 'cancelados ou faltas'], [ia, 'pelo WhatsApp (IA)'], [brl(fat), 'valor de tabela'],
+  ].map(([v, l]) => `<div class="chip"><b>${typeof v === 'number' ? fmt.format(v) : v}</b><span>${l}</span></div>`).join('');
+  if (!itens.length) { $('#ag-view').innerHTML = '<div class="card empty">Nenhum agendamento com esses filtros.</div>'; return; }
+  ag.vis === 'grade' ? renderGrade(d) : renderLista(itens);
+}
+function renderGrade(d) {
+  const itens = d.itens;
+  const ids = [...new Set(itens.map(i => i.profissional_id))];
+  const nomes = Object.fromEntries(d.profissionais.map(p => [p.id, p.nome]));
+  itens.forEach(i => { if (!nomes[i.profissional_id]) nomes[i.profissional_id] = i.profissional; });
+  const cols = ids.sort((a, b) => String(nomes[a]).localeCompare(nomes[b]));
+  const ini = Math.min(8 * 60, ...itens.map(i => minutos(i.inicio))), fim = Math.max(19 * 60, ...itens.map(i => minutos(i.fim)));
+  const H0 = Math.floor(ini / 60) * 60, H1 = Math.ceil(fim / 60) * 60, PX = 1.3, alt = (H1 - H0) * PX;
+  let html = `<div class="ag" style="grid-template-columns: 52px repeat(${cols.length}, minmax(150px, 1fr))">`;
+  html += `<div class="corner"></div>` + cols.map(c => `<div class="head" title="${esc(nomes[c])}">${esc(nomes[c])}</div>`).join('');
+  let horas = ''; for (let m = H0; m <= H1; m += 60) horas += `<div class="tl" style="top:${(m - H0) * PX}px">${String(m / 60).padStart(2, '0')}h</div>`;
+  html += `<div class="hcol" style="position:relative;height:${alt}px">${horas}</div>`;
+  const agora = ag.dia === hojeISO() ? (() => { const n = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Maceio' })); return n.getHours() * 60 + n.getMinutes(); })() : null;
+  cols.forEach(c => {
+    let g = '';
+    for (let m = H0; m < H1; m += 30) g += `<div class="tick${m % 60 ? '' : ' h'}" style="top:${(m - H0) * PX}px"></div>`;
+    const evs = itens.filter(i => i.profissional_id === c).sort((a, b) => minutos(a.inicio) - minutos(b.inicio));
+    // blocos que se sobrepõem dividem a largura só entre eles
+    let grupo = [], fimGrupo = -1;
+    const fecha = () => { const fins = [];
+      grupo.forEach(e => { const s0 = minutos(e.inicio); let l = fins.findIndex(f => f <= s0); if (l < 0) { l = fins.length; fins.push(0); } fins[l] = minutos(e.fim); e._l = l; });
+      grupo.forEach(e => { e._n = fins.length; }); grupo = []; };
+    evs.forEach(e => { if (minutos(e.inicio) >= fimGrupo && grupo.length) fecha(); grupo.push(e); fimGrupo = Math.max(fimGrupo, minutos(e.fim)); });
+    if (grupo.length) fecha();
+    evs.forEach(e => { const top = (minutos(e.inicio) - H0) * PX, h = Math.max(18, (minutos(e.fim) - minutos(e.inicio)) * PX - 2);
+      const w = 100 / e._n;
+      g += `<div class="ev st-${esc(e.status)}" data-ev='${esc(JSON.stringify(e))}' style="top:${top}px;height:${h}px;left:calc(${e._l * w}% + 2px);width:calc(${w}% - 4px)">
+        <b>${esc(e.cliente)}${e.ia ? '<i class="ia">IA</i>' : ''}</b><span>${esc(e.inicio)}–${esc(e.fim)} · ${esc(e.servico)}</span></div>`; });
+    if (agora != null && agora >= H0 && agora <= H1) g += `<div class="nowline" style="top:${(agora - H0) * PX}px"></div>`;
+    html += `<div class="col" style="height:${alt}px">${g}</div>`;
+  });
+  $('#ag-view').innerHTML = `<div class="agwrap">${html}</div></div>`;
+  $('#ag-view').querySelectorAll('.ev').forEach(el => {
+    const e = JSON.parse(el.dataset.ev);
+    const t = `<b>${esc(e.cliente)}</b>${esc(e.servico)}<br>${esc(e.inicio)}–${esc(e.fim)} · ${esc(e.profissional)}<br>${esc(ST[e.status] || e.status)}${e.preco ? ' · ' + brl(e.preco) : ''}${e.ia ? '<br>Agendado pelo WhatsApp (IA)' : ''}`;
+    el.addEventListener('pointermove', (ev) => showTip(ev, t)); el.addEventListener('pointerleave', hideTip);
+    el.addEventListener('click', (ev) => showTip(ev, t));
+  });
+}
+function renderLista(itens) {
+  let ultimoDia = '', rows = '';
+  itens.forEach(i => {
+    if (i.data !== ultimoDia) { ultimoDia = i.data; const dt = new Date(i.data + 'T12:00:00');
+      rows += `<tr><td colspan="6" style="background:var(--bg);font-weight:600">${DIA_SEM[dt.getDay()]}, ${ddmm(i.data)}</td></tr>`; }
+    rows += `<tr><td>${esc(i.inicio)}–${esc(i.fim)}</td><td>${esc(i.cliente)}${i.ia ? ' <span class="pill">WhatsApp IA</span>' : ''}</td>
+      <td>${esc(i.servico)}${i.categoria ? `<div class="sub">${esc(i.categoria)}</div>` : ''}</td><td>${esc(i.profissional)}</td>
+      <td>${statusTag(ST_TAG[i.status] || 'warning', ST[i.status] || i.status)}</td><td class="num">${i.preco ? brl(i.preco) : '—'}</td></tr>`;
+  });
+  $('#ag-view').innerHTML = `<div class="card tablewrap"><table><tr><th>Horário</th><th>Cliente</th><th>Serviço</th><th>Profissional</th><th>Situação</th><th style="text-align:right">Tabela</th></tr>${rows}</table></div>`;
+}
+$('#ag-prev').addEventListener('click', () => { ag.dia = addDias(ag.dia, -1); $('#ag-dia').value = ag.dia; carregarAgenda(); });
+$('#ag-next').addEventListener('click', () => { ag.dia = addDias(ag.dia, 1); $('#ag-dia').value = ag.dia; carregarAgenda(); });
+$('#ag-hoje').addEventListener('click', () => { ag.dia = hojeISO(); $('#ag-dia').value = ag.dia; carregarAgenda(); });
+$('#ag-dia').addEventListener('change', (e) => { if (e.target.value) { ag.dia = e.target.value; carregarAgenda(); } });
+$('#ag-ate').addEventListener('change', (e) => { if (e.target.value) { ag.ate = e.target.value; carregarAgenda(); } });
+$('#ag-prof').addEventListener('change', (e) => { ag.prof = e.target.value; carregarAgenda(); });
+$('#ag-status').addEventListener('change', (e) => { ag.status = e.target.value; carregarAgenda(); });
+document.querySelectorAll('[data-vis]').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('[data-vis]').forEach(x => x.setAttribute('aria-pressed', x === b));
+  ag.vis = b.dataset.vis; $('#ag-ate-wrap').hidden = ag.vis !== 'lista';
+  $('#ag-prev').hidden = $('#ag-next').hidden = ag.vis === 'lista'; carregarAgenda(); }));
+
+// ---------------------------------------------------------------- Ranking
+const rk = { ini: addDias(hojeISO(), -29), fim: hojeISO(), dados: null, ord: {} };
+$('#rk-ini').value = rk.ini; $('#rk-fim').value = rk.fim;
+async function carregarRanking() {
+  if (!DEMO && (!sb || $('#app').hidden)) return;
+  if (DEMO) { rk.dados = window.CBK_DEMO_RANKING || null; if (rk.dados) renderRanking(); return; }
+  const { data, error } = await sb.rpc('dashboard_ranking', { p_ini: rk.ini, p_fim: rk.fim });
+  if (error) { $('#rk-kpis').innerHTML = `<div class="card">Erro ao carregar: ${esc(error.message)}</div>`; return; }
+  rk.dados = data; renderRanking();
+}
+function tabela(el, chave, cols, rows) {
+  const o = rk.ord[chave];
+  if (o) rows = [...rows].sort((a, b) => { const x = a[o.k], y = b[o.k]; return (typeof x === 'number' ? x - y : String(x).localeCompare(String(y))) * o.d; });
+  const max = Math.max(1, ...rows.map(r => +r[cols[1].k] || 0));
+  el.innerHTML = !rows.length ? '<div class="empty">Sem dados no período.</div>' :
+    `<table><tr>${cols.map(c => `<th class="sort" data-k="${c.k}" style="${c.num ? 'text-align:right' : ''}">${c.t}</th>`).join('')}</tr>` +
+    rows.map((r, i) => `<tr>${cols.map((c, j) => `<td class="${c.num ? 'num' : ''}">${j === 0 ? `<b>${i + 1}.</b> ` : ''}${c.f ? c.f(r[c.k], r) : esc(r[c.k] ?? '—')}${j === 1 ? `<div class="bar" style="width:${Math.max(2, 100 * (+r[c.k] || 0) / max)}%"></div>` : ''}</td>`).join('')}</tr>`).join('') + '</table>';
+  el.querySelectorAll('th.sort').forEach(th => th.addEventListener('click', () => {
+    const k = th.dataset.k, at = rk.ord[chave]; rk.ord[chave] = { k, d: at && at.k === k ? -at.d : -1 }; renderRanking(); }));
+}
+function renderRanking() {
+  const r = rk.dados; if (!r) return; const s = r.resumo || {};
+  const tiles = [
+    ['Atendimentos', fmt.format(s.atendimentos || 0), `${fmt.format(s.servicos || 0)} serviços feitos`],
+    ['Faturamento estimado', brl(s.faturamento_estimado), 'pela tabela de preços'],
+    ['Ticket médio', brl(s.ticket_medio), 'por atendimento'],
+    ['Clientes atendidas', fmt.format(s.clientes || 0), 'diferentes no período'],
+    ['Cancelados ou faltas', fmt.format(s.cancelados || 0), s.atendimentos ? Math.round(100 * s.cancelados / (s.atendimentos + s.cancelados)) + '% dos agendamentos' : ''],
+    ['Pelo WhatsApp (IA)', fmt.format(s.pelo_whatsapp || 0), 'agendamentos lançados pelo agente'],
+  ];
+  $('#rk-kpis').innerHTML = tiles.map(([l, v, h]) => `<div class="card kpi"><div class="label">${l}</div><div class="value">${v}</div><div class="hint">${esc(h)}</div></div>`).join('');
+  tabela($('#rk-prof'), 'prof', [{ t: 'Profissional', k: 'nome' }, { t: 'Faturamento', k: 'faturamento', num: 1, f: brl }, { t: 'Atendimentos', k: 'atendimentos', num: 1 },
+    { t: 'Serviços', k: 'servicos', num: 1 }, { t: 'Clientes', k: 'clientes', num: 1 }, { t: 'Ticket médio', k: 'ticket_medio', num: 1, f: brl }, { t: 'Cancel./faltas', k: 'cancelados', num: 1 }], r.profissionais);
+  tabela($('#rk-serv'), 'serv', [{ t: 'Serviço', k: 'nome', f: (v, x) => `${esc(v)}${x.categoria ? `<div class="sub">${esc(x.categoria)}</div>` : ''}` }, { t: 'Vezes', k: 'qtd', num: 1 }, { t: 'Faturamento', k: 'faturamento', num: 1, f: brl }], r.servicos);
+  tabela($('#rk-cat'), 'cat', [{ t: 'Categoria', k: 'nome' }, { t: 'Faturamento', k: 'faturamento', num: 1, f: brl }, { t: 'Serviços', k: 'qtd', num: 1 }], r.categorias);
+  tabela($('#rk-cli'), 'cli', [{ t: 'Cliente', k: 'nome' }, { t: 'Visitas', k: 'visitas', num: 1 }, { t: 'Gasto (tabela)', k: 'gasto', num: 1, f: brl },
+    { t: 'Última visita', k: 'ultima', f: ddmm }, { t: 'Profissional preferida', k: 'profissional' }], r.clientes);
+}
+document.querySelectorAll('[data-rk]').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('[data-rk]').forEach(x => x.setAttribute('aria-pressed', x === b));
+  const h = hojeISO(), v = b.dataset.rk;
+  if (v === 'mes') { rk.ini = h.slice(0, 8) + '01'; rk.fim = h; }
+  else if (v === 'mesant') { const d = new Date(h.slice(0, 8) + '01T12:00:00'); d.setDate(0); rk.fim = d.toLocaleDateString('sv-SE'); rk.ini = rk.fim.slice(0, 8) + '01'; }
+  else { rk.ini = addDias(h, 1 - +v); rk.fim = h; }
+  $('#rk-ini').value = rk.ini; $('#rk-fim').value = rk.fim; carregarRanking(); }));
+['#rk-ini', '#rk-fim'].forEach(id => $(id).addEventListener('change', () => {
+  rk.ini = $('#rk-ini').value || rk.ini; rk.fim = $('#rk-fim').value || rk.fim;
+  document.querySelectorAll('[data-rk]').forEach(x => x.setAttribute('aria-pressed', false)); carregarRanking(); }));
 
 let ultimo = null, ultimoB = null, rz;
 addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => { ultimo && render(ultimo); ultimoB && renderBelasis(ultimoB); }, 150); });
@@ -451,16 +704,20 @@ function demoData(n) {
 }
 
 async function load() {
-  if (DEMO) { render(demoData(dias)); ultimoB = window.CBK_DEMO_BELASIS || null; renderBelasis(ultimoB); return; }
+  if (DEMO) { render(demoData(dias)); ultimoB = window.CBK_DEMO_BELASIS || null; renderBelasis(ultimoB); mostrarVisibilidade();
+    if (aba === 'agenda') carregarAgenda(); else if (aba === 'ranking') carregarRanking(); return; }
   const { data, error } = await sb.rpc('dashboard_dados', { p_dias: dias });
   if (error) { $('#sub').textContent = error.message.includes('acesso_negado') ? 'Seu e-mail não tem acesso a este painel.' : 'Erro ao carregar: ' + error.message; return; }
   render(data);
   const rb = await sb.rpc('dashboard_belasis', { p_dias: Math.max(dias, 7) });
   ultimoB = rb.error ? null : rb.data; renderBelasis(ultimoB);
+  if (aba === 'agenda') carregarAgenda(); else if (aba === 'ranking') carregarRanking();
+  mostrarVisibilidade();
 }
+function mostrarVisibilidade() { $('#belasis').hidden = aba !== 'salao' || !ultimoB; }
 
-document.querySelectorAll('.seg button').forEach(b => b.addEventListener('click', () => {
-  document.querySelectorAll('.seg button').forEach(x => x.setAttribute('aria-pressed', x === b));
+document.querySelectorAll('[data-dias]').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('[data-dias]').forEach(x => x.setAttribute('aria-pressed', x === b));
   dias = +b.dataset.dias; load(); }));
 $('#refresh').addEventListener('click', load);
 setInterval(() => { if (!document.hidden && !$('#app').hidden) load(); }, 60000);
@@ -487,6 +744,7 @@ async function start() {
     $('#login').hidden = true; $('#app').hidden = false; load(); });
 }
 start();
+mostrarAba(aba);
 </script>
 </body>
 </html>
