@@ -1,4 +1,5 @@
-// belasis-sync — leitura (somente GET) da API Belasis para o banco do agente.
+// belasis-sync — leitura da API Belasis para o banco do agente e, quando ligado,
+// a escrita automática do pré-agendamento (POST /clients e POST /schedule_groups, NÃO CONFIRMADO).
 // Chamada pelo pg_cron (public.belasis_disparar_sync) a cada minuto enquanto há fila.
 // Autenticação: header x-cbk-secret (mesmo segredo do Vault). A chave Belasis fica
 // só nos segredos das Edge Functions (BELASIS_ACCESS_TOKEN ou qualquer valor "bpk_...").
@@ -6,6 +7,9 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 
 const LOTE = 15;            // ≤ 15 requisições por execução (limite Belasis: 30/min)
 const INTERVALO_MS = 1500;  // espaçamento entre chamadas
+
+// únicas escritas permitidas — nunca PATCH/DELETE, nunca outra rota
+const ESCRITAS_PERMITIDAS = new Set(["POST /clients", "POST /schedule_groups"]);
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
@@ -30,7 +34,7 @@ Deno.serve(async (req) => {
   if (!autorizado) return json({ erro: "não autorizado" }, 401);
 
   const { data: cfg } = await db.from("config_bot").select("chave, valor")
-    .in("chave", ["belasis_modo", "belasis_base_url"]);
+    .in("chave", ["belasis_modo", "belasis_base_url", "belasis_escrita_automatica"]);
   const conf = Object.fromEntries((cfg ?? []).map((c: { chave: string; valor: unknown }) => [c.chave, c.valor]));
   if (!conf.belasis_modo || conf.belasis_modo === "desligado") return json({ ok: false, motivo: "belasis_desligado" });
   const base = String(conf.belasis_base_url ?? "https://api.belasis.com.br/api/v1").replace(/\/$/, "");
@@ -49,12 +53,22 @@ Deno.serve(async (req) => {
     const url = new URL(base + it.caminho);
     for (const [k, v] of Object.entries(it.query ?? {})) url.searchParams.set(k, String(v));
 
+    const metodo = String(it.metodo ?? "GET").toUpperCase();
     const inicio = Date.now();
     let status = 0, corpo: unknown = null, erro: string | null = null;
+    if (metodo !== "GET" && (conf.belasis_escrita_automatica !== true || !ESCRITAS_PERMITIDAS.has(`${metodo} ${it.caminho}`))) {
+      erro = `escrita bloqueada: ${metodo} ${it.caminho}`;
+      await db.rpc("belasis_registrar_resposta", { p_id: it.id, p_status: 403, p_resposta: null, p_erro: erro });
+      await db.rpc("belasis_log_chamada", { p_metodo: metodo, p_caminho: it.caminho, p_status: 403, p_ms: 0, p_erro: erro });
+      resumo.processados++; resumo.erros++;
+      continue;
+    }
     try {
       const r = await fetch(url, {
-        method: "GET",
-        headers: { "ACCESS-TOKEN": token, "Accept": "application/json" },
+        method: metodo,
+        headers: { "ACCESS-TOKEN": token, "Accept": "application/json",
+                   ...(metodo === "GET" ? {} : { "Content-Type": "application/json" }) },
+        body: metodo === "GET" ? undefined : JSON.stringify(it.corpo ?? {}),
         signal: AbortSignal.timeout(20000),
       });
       status = r.status;
@@ -67,7 +81,7 @@ Deno.serve(async (req) => {
     const ms = Date.now() - inicio;
 
     await db.rpc("belasis_registrar_resposta", { p_id: it.id, p_status: status, p_resposta: corpo, p_erro: erro });
-    await db.rpc("belasis_log_get", { p_caminho: it.caminho, p_status: status, p_ms: ms, p_erro: erro });
+    await db.rpc("belasis_log_chamada", { p_metodo: metodo, p_caminho: it.caminho, p_status: status, p_ms: ms, p_erro: erro });
     resumo.processados++;
     if (status < 200 || status > 299) resumo.erros++;
 
