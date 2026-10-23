@@ -80,8 +80,17 @@ Deno.serve(async (req) => {
     }
     const ms = Date.now() - inicio;
 
-    await db.rpc("belasis_registrar_resposta", { p_id: it.id, p_status: status, p_resposta: corpo, p_erro: erro });
-    await db.rpc("belasis_log_chamada", { p_metodo: metodo, p_caminho: it.caminho, p_status: status, p_ms: ms, p_erro: erro });
+    const { error: eReg } = await db.rpc("belasis_registrar_resposta", { p_id: it.id, p_status: status, p_resposta: corpo, p_erro: erro });
+    if (eReg) {
+      // o Belasis respondeu, mas o banco não conseguiu registrar: deixa visível (nunca silencioso)
+      const idCriado = (corpo as { id?: number } | null)?.id;
+      await db.from("belasis_fila").update({
+        estado: "erro", status_http: status, processado_em: new Date().toISOString(),
+        erro: `registro falhou (${eReg.message})${idCriado ? ` · Belasis id ${idCriado}` : ""}`.slice(0, 500),
+      }).eq("id", it.id);
+    }
+    await db.rpc("belasis_log_chamada", { p_metodo: metodo, p_caminho: it.caminho, p_status: status, p_ms: ms,
+                                          p_erro: erro ?? (eReg ? `registro: ${eReg.message}` : null) });
     resumo.processados++;
     if (status < 200 || status > 299) resumo.erros++;
 
