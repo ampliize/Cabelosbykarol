@@ -54,6 +54,8 @@ h1 { font-size: 20px; margin: 0; }
 .seg button { border: 0; background: none; color: var(--text-secondary); padding: 6px 12px; font: inherit; cursor: pointer; }
 .seg button[aria-pressed="true"] { background: var(--accent); color: #fff; }
 .btn { border: 1px solid var(--border); background: var(--surface-1); color: var(--text-primary); padding: 6px 12px; border-radius: 8px; font: inherit; cursor: pointer; }
+.btn-emerg { font-weight: 600; color: #fff; background: var(--critical); border-color: var(--critical); }
+.btn-emerg[data-ligar] { background: var(--good); border-color: var(--good); }
 .pill { display: inline-flex; gap: 6px; align-items: center; padding: 3px 10px; border-radius: 999px; font-size: 12px; border: 1px solid var(--border); background: var(--surface-1); color: var(--text-secondary); }
 .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
 .grid { display: grid; gap: 12px; }
@@ -148,6 +150,7 @@ th.sort::after { content: ' ↕'; color: var(--text-muted); font-size: 10px; }
     </div>
     <div class="controls">
       <span class="pill" id="pill-bot"></span>
+      <button class="btn btn-emerg" id="emergencia" hidden></button>
       <div class="seg" role="group" aria-label="Período">
         <button data-dias="1">Hoje</button><button data-dias="7" aria-pressed="true">7 dias</button><button data-dias="30">30 dias</button>
       </div>
@@ -659,13 +662,29 @@ document.querySelectorAll('[data-rk]').forEach(b => b.addEventListener('click', 
   document.querySelectorAll('[data-rk]').forEach(x => x.setAttribute('aria-pressed', false)); carregarRanking(); }));
 
 let ultimo = null, ultimoB = null, rz;
+$('#emergencia').addEventListener('click', async (e) => {
+  const ligar = !e.currentTarget.dataset.ativo;
+  const msg = ligar ? 'Religar o agente de IA? Ele volta a responder as clientes no WhatsApp.'
+                    : 'PAUSAR o agente de IA agora? Ele para de responder e de enviar mensagens; a equipe atende pelo WhatsApp normalmente.';
+  if (!confirm(msg)) return;
+  e.currentTarget.disabled = true;
+  const { error } = await sb.rpc('painel_definir_agente', { p_ativo: ligar });
+  e.currentTarget.disabled = false;
+  if (error) { alert('Não consegui alterar: ' + error.message); return; }
+  load();
+});
 addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => { ultimo && render(ultimo); ultimoB && renderBelasis(ultimoB); }, 150); });
 function render(d) {
   ultimo = d;
   $('#sub').textContent = `Atualizado ${hora(d.gerado_em)} · últimos ${d.periodo_dias === 1 ? 'hoje' : d.periodo_dias + ' dias'}`;
   $('#pill-bot').innerHTML = d.bot_ativo
     ? `<span class="dot" style="background:var(--good)"></span>✓ Agente ligado${d.modo_piloto ? ' · modo piloto' : ''}`
-    : `<span class="dot" style="background:var(--critical)"></span>✕ Agente desligado`;
+    : `<span class="dot" style="background:var(--critical)"></span>✕ Agente PAUSADO`;
+  const be = $('#emergencia');
+  be.hidden = DEMO;
+  be.textContent = d.bot_ativo ? '⏸ Pausar agente (emergência)' : '▶ Religar agente';
+  be.toggleAttribute('data-ligar', !d.bot_ativo);
+  be.dataset.ativo = d.bot_ativo ? '1' : '';
   $('#banner').innerHTML = DEMO ? '<div class="banner">Modo demonstração: dados fictícios.</div>' : '';
   renderKpis(d); renderSerie(d.serie_diaria); renderMotivos(d.motivos_transferencia);
   renderAgora(d.conversas_com_humano); renderCalor(d.mapa_calor); renderEnc(d.ultimos_encaminhamentos);
