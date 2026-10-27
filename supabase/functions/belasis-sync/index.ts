@@ -1,5 +1,5 @@
 // belasis-sync — leitura da API Belasis para o banco do agente e, quando ligado,
-// a escrita automática do pré-agendamento (POST /clients e POST /schedule_groups, NÃO CONFIRMADO).
+// a escrita automática do agendamento (POST /clients, POST /schedule_groups, PATCH /schedule_groups/{id}/cancel).
 // Chamada pelo pg_cron (public.belasis_disparar_sync) a cada minuto enquanto há fila.
 // Autenticação: header x-cbk-secret (mesmo segredo do Vault). A chave Belasis fica
 // só nos segredos das Edge Functions (BELASIS_ACCESS_TOKEN ou qualquer valor "bpk_...").
@@ -8,8 +8,11 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 const LOTE = 15;            // ≤ 15 requisições por execução (limite Belasis: 30/min)
 const INTERVALO_MS = 1500;  // espaçamento entre chamadas
 
-// únicas escritas permitidas — nunca PATCH/DELETE, nunca outra rota
+// únicas escritas permitidas — nunca DELETE, nunca outra rota. O PATCH só cancela um agendamento
+// (o banco só enfileira cancelamento de agendamento da própria cliente da conversa).
 const ESCRITAS_PERMITIDAS = new Set(["POST /clients", "POST /schedule_groups"]);
+const escritaPermitida = (metodo: string, caminho: string) =>
+  ESCRITAS_PERMITIDAS.has(`${metodo} ${caminho}`) || (metodo === "PATCH" && /^\/schedule_groups\/\d+\/cancel$/.test(caminho));
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
@@ -56,7 +59,7 @@ Deno.serve(async (req) => {
     const metodo = String(it.metodo ?? "GET").toUpperCase();
     const inicio = Date.now();
     let status = 0, corpo: unknown = null, erro: string | null = null;
-    if (metodo !== "GET" && (conf.belasis_escrita_automatica !== true || !ESCRITAS_PERMITIDAS.has(`${metodo} ${it.caminho}`))) {
+    if (metodo !== "GET" && (conf.belasis_escrita_automatica !== true || !escritaPermitida(metodo, it.caminho))) {
       erro = `escrita bloqueada: ${metodo} ${it.caminho}`;
       await db.rpc("belasis_registrar_resposta", { p_id: it.id, p_status: 403, p_resposta: null, p_erro: erro });
       await db.rpc("belasis_log_chamada", { p_metodo: metodo, p_caminho: it.caminho, p_status: 403, p_ms: 0, p_erro: erro });

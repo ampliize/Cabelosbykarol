@@ -8,6 +8,7 @@
 --  7. horários: lista do dia inteiro + se o horário pedido está livre (o agente não deduz mais)
 
 alter table public.conversas add column if not exists nascimento date;
+alter table public.belasis_fila add column if not exists meta jsonb;
 
 -- assinaturas novas (mais parâmetros): remove as antigas para não haver ambiguidade
 drop function if exists public.agendar_whatsapp(uuid, text, date, time, text, text, text);
@@ -175,7 +176,7 @@ begin
      and not exists (select 1 from public.pre_agendamentos p where p.belasis_agendamento_id = p_ag_id and p.conversa_id = p_conversa_id) then
     raise exception 'agendamento % não pertence a esta cliente', p_ag_id;
   end if;
-  insert into public.belasis_fila (chave, caminho, metodo, corpo, query)
+  insert into public.belasis_fila (chave, caminho, metodo, corpo, meta)
   values ('escrita_cancelar:' || p_ag_id, '/schedule_groups/' || p_ag_id || '/cancel', 'PATCH', '{}'::jsonb,
           jsonb_build_object('conversa_id', p_conversa_id, 'motivo', p_motivo))
   on conflict (chave) do nothing;
@@ -362,8 +363,8 @@ $x$  if v_tipo = 'escrita_cancelar' then
       update public.belasis_agendamentos set status = 'disconfirm', atualizado_em = now()
        where id = split_part(split_part(f.chave, ':', 2), '#', 1)::int;
     end if;
-    perform public.encaminhar_seguro('cancelamento_cliente', nullif(f.query->>'conversa_id', '')::uuid,
-      case when p_status between 200 and 299 then 'Cancelado no Belasis (' || coalesce(f.query->>'motivo', 'WhatsApp') || ')'
+    perform public.encaminhar_seguro('cancelamento_cliente', nullif(f.meta->>'conversa_id', '')::uuid,
+      case when p_status between 200 and 299 then 'Cancelado no Belasis (' || coalesce(f.meta->>'motivo', 'WhatsApp') || ')'
            else 'NÃO consegui cancelar no Belasis: cancele manualmente' end,
       'Agendamento ' || split_part(f.chave, ':', 2) || coalesce(' · ' || p_erro, ''), null);
     return;
