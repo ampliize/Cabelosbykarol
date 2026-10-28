@@ -59,20 +59,50 @@ end;
 $function$;
 
 -- depois de transferir, nada de "já chamei alguém": a IA fica em silêncio
-do $$
-declare d text;
+create or replace function public.verificar_envio(p_conversa_id uuid)
+returns jsonb
+language plpgsql
+set search_path to ''
+as $function$
+declare
+  v_conv        public.conversas;
+  v_ultimo_out  timestamptz;
+  v_intervalo   integer := coalesce((public.cfg('envio_intervalo_min_ms'))::int, 3000);
+  v_espera      integer := 0;
+  v_cota        jsonb;
 begin
-  d := pg_get_functiondef('public.verificar_envio(uuid)'::regprocedure);
-  if position('h.criado_em > now() - interval ''2 minutes''' in d) > 0 then
-    d := replace(d, $x$  if v_conv.status <> 'bot' and not (
-       v_conv.status = 'aguardando_humano'
-       and exists (select 1 from public.handoffs h
-                    where h.conversa_id = p_conversa_id and h.criado_em > now() - interval '2 minutes')
-     ) then$x$, $x$  if v_conv.status <> 'bot' then$x$);
-    if position('2 minutes' in d) > 0 then raise exception 'verificar_envio: trecho não encontrado'; end if;
-    execute d;
+  select * into v_conv from public.conversas where id = p_conversa_id;
+  if v_conv.id is null then
+    return jsonb_build_object('permitido', false, 'motivo', 'conversa_inexistente');
   end if;
-end $$;
+
+  if not coalesce((public.cfg('bot_ativo'))::boolean, false) then
+    return jsonb_build_object('permitido', false, 'motivo', 'bot_desligado');
+  end if;
+
+  if v_conv.status <> 'bot' then
+    return jsonb_build_object('permitido', false, 'motivo', 'humano_na_conversa');
+  end if;
+
+  if v_conv.ultima_msg_cliente_em is null or v_conv.ultima_msg_cliente_em < now() - interval '24 hours' then
+    return jsonb_build_object('permitido', false, 'motivo', 'fora_da_janela_24h');
+  end if;
+
+  select max(criado_em) into v_ultimo_out
+    from public.mensagens
+   where conversa_id = p_conversa_id and direcao = 'out' and autor = 'bot';
+  if v_ultimo_out is not null then
+    v_espera := greatest(0, v_intervalo - (extract(epoch from (clock_timestamp() - v_ultimo_out)) * 1000)::int);
+  end if;
+
+  v_cota := public.reservar_cota('whatsapp_envio', coalesce((public.cfg('envio_limite_por_minuto'))::int, 20));
+  if not (v_cota->>'permitido')::boolean then
+    return jsonb_build_object('permitido', false, 'motivo', 'limite_global', 'aguardar_ms', v_cota->'aguardar_ms');
+  end if;
+
+  return jsonb_build_object('permitido', true, 'aguardar_ms', v_espera);
+end;
+$function$;
 
 -- confirmação: pré-agendado, a equipe confirma
 do $$
