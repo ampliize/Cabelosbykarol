@@ -131,6 +131,30 @@ details summary { cursor: pointer; color: var(--text-secondary); font-size: 12px
 th.sort { cursor: pointer; user-select: none; }
 th.sort::after { content: ' ↕'; color: var(--text-muted); font-size: 10px; }
 .bar { height: 6px; border-radius: 3px; background: var(--series-1); margin-top: 4px; }
+.btn-mini { padding: 2px 8px; font-size: 12px; margin-left: 6px; }
+.alerta.n1 { border-left-color: var(--critical); }
+.alerta.n2 { border-left-color: var(--warning); }
+.fn { display: grid; grid-template-columns: 190px 1fr 100px; gap: 8px; align-items: center; margin: 6px 0; }
+.fn .bar { margin: 0; height: 10px; }
+.fn-v { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+@media (max-width: 600px) { .fn { grid-template-columns: 1fr 80px; } .fn-b { grid-column: 1 / -1; order: 3; } }
+.cvgrid { display: grid; grid-template-columns: minmax(260px, 1fr) 2fr; gap: 12px; }
+@media (max-width: 860px) { .cvgrid { grid-template-columns: 1fr; } }
+.cvlist { padding: 6px; max-height: 75vh; overflow: auto; }
+.cvitem { display: block; width: 100%; text-align: left; border: 0; border-bottom: 1px solid var(--grid); background: none; padding: 10px;
+  border-radius: 8px; cursor: pointer; color: inherit; font: inherit; }
+.cvitem[aria-current="true"] { background: color-mix(in srgb, var(--accent) 12%, var(--surface-1)); }
+.chat { max-height: 60vh; overflow: auto; display: flex; flex-direction: column; gap: 6px; padding: 8px 0; }
+.bal { max-width: 80%; padding: 6px 10px; border-radius: 10px; font-size: 13px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.bal.in { align-self: flex-start; background: var(--bg); border: 1px solid var(--border); }
+.bal.out { align-self: flex-end; background: color-mix(in srgb, var(--series-3) 16%, var(--surface-1)); }
+.bal.out.humano { background: color-mix(in srgb, var(--series-2) 18%, var(--surface-1)); }
+.bal.sistema { align-self: center; color: var(--text-muted); font-size: 12px; border: 1px dashed var(--border); }
+.bal small { display: block; color: var(--text-muted); font-size: 11px; margin-top: 2px; }
+.cfg input, .cfg select, #cfg-gerentes, #cv-busca { border: 1px solid var(--border); background: var(--surface-1); color: var(--text-primary);
+  border-radius: 6px; padding: 4px 6px; font: inherit; font-size: 13px; max-width: 100%; }
+#cfg-gerentes { width: 100%; max-width: 420px; }
+.cfg td { vertical-align: middle; }
 </style>
 </head>
 <body>
@@ -161,13 +185,22 @@ th.sort::after { content: ' ↕'; color: var(--text-muted); font-size: 10px; }
 
   <nav class="tabs" role="tablist" aria-label="Seções">
     <button role="tab" data-tab="atendimento" aria-selected="true">Atendimento WhatsApp</button>
+    <button role="tab" data-tab="conversas" aria-selected="false">Conversas</button>
     <button role="tab" data-tab="agenda" aria-selected="false">Agenda do salão</button>
     <button role="tab" data-tab="ranking" aria-selected="false">Ranking</button>
     <button role="tab" data-tab="salao" aria-selected="false">Indicadores do salão</button>
+    <button role="tab" data-tab="config" aria-selected="false">Configurações</button>
   </nav>
   <div id="banner"></div>
   <div id="tab-atendimento">
+  <section id="alertas"></section>
   <section class="grid kpis" id="kpis"></section>
+
+  <section class="card" style="margin-bottom:12px">
+    <h2>Funil do período</h2>
+    <div class="desc">Da conversa no WhatsApp até a confirmação da equipe no Belasis.</div>
+    <div id="funil"></div>
+  </section>
 
   <section class="grid two">
     <div class="card">
@@ -204,6 +237,44 @@ th.sort::after { content: ' ↕'; color: var(--text-muted); font-size: 10px; }
   </section>
 
   <section class="grid kpis" id="ops"></section>
+  </div>
+
+  <div id="tab-conversas" hidden>
+    <div class="toolbar">
+      <div class="seg" role="group" aria-label="Filtro de conversas">
+        <button data-cv="todas" aria-pressed="true">Todas</button><button data-cv="equipe" aria-pressed="false">Com a equipe</button><button data-cv="aguardando" aria-pressed="false">Aguardando equipe</button>
+      </div>
+      <label>Buscar <input id="cv-busca" type="search" placeholder="nome ou telefone"></label>
+    </div>
+    <div class="cvgrid">
+      <div class="card cvlist" id="cv-lista"><div class="empty">Carregando…</div></div>
+      <div class="card" id="cv-det"><div class="empty">Escolha uma conversa para ver o histórico.</div></div>
+    </div>
+  </div>
+
+  <div id="tab-config" hidden>
+    <section class="card" style="margin-bottom:12px">
+      <h2>Equipe que recebe os avisos</h2>
+      <div class="desc">Prioridade 1 é avisada primeiro. "Horário do salão" só recebe com o salão aberto; fora dele vai para quem é 24h.</div>
+      <div class="tablewrap" id="cfg-equipe"><div class="empty">Carregando…</div></div>
+    </section>
+    <section class="card" style="margin-bottom:12px">
+      <h2>Gerência</h2>
+      <div class="desc">Recebe toda transferência e dúvida do agente, além de quem está de plantão. Um telefone por linha, com 55 e DDD.</div>
+      <textarea id="cfg-gerentes" rows="3"></textarea>
+      <div class="toolbar" style="margin-top:8px"><button class="btn" id="cfg-ger-salvar">Salvar gerência</button><span class="sub" id="cfg-ger-msg"></span></div>
+    </section>
+    <section class="card" style="margin-bottom:12px">
+      <h2>Função das profissionais</h2>
+      <div class="desc">Define quem entra na lista da vez. "Recepção / interno" nunca recebe agendamento do agente. Salva ao trocar.</div>
+      <div class="tablewrap" id="cfg-prof"></div>
+    </section>
+    <section class="card">
+      <h2>Quem faz cada serviço</h2>
+      <div class="desc">"Sem preferência, primeiro": quando a cliente não tem preferência, essa profissional vem antes da lista da vez (se tiver vaga).</div>
+      <div class="toolbar"><label>Buscar <input id="cfg-sv-busca" type="search" placeholder="serviço"></label><label>Categoria <select id="cfg-sv-cat"></select></label></div>
+      <div class="tablewrap" id="cfg-serv"></div>
+    </section>
   </div>
 
   <div id="tab-agenda" hidden>
@@ -511,12 +582,159 @@ function mostrarAba(t) {
   document.querySelectorAll('.tabs button').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === t));
   $('#tab-atendimento').hidden = t !== 'atendimento';
   $('#tab-agenda').hidden = t !== 'agenda';
+  $('#tab-conversas').hidden = t !== 'conversas';
+  $('#tab-config').hidden = t !== 'config';
   $('#tab-ranking').hidden = t !== 'ranking';
   $('#belasis').hidden = t !== 'salao' || !ultimoB;
   document.querySelector('.seg[aria-label="Período"]').style.visibility = (t === 'atendimento' || t === 'salao') ? 'visible' : 'hidden';
   if (t === 'agenda') carregarAgenda(); else if (t === 'ranking') carregarRanking(); else if (t === 'salao' && ultimoB) renderBelasis(ultimoB);
+  else if (t === 'conversas') carregarConversas(); else if (t === 'config') carregarConfig();
 }
 document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => mostrarAba(b.dataset.tab)));
+
+// ---------------------------------------------------------------- Alertas e funil
+async function carregarExtras() {
+  if (DEMO) { $('#alertas').innerHTML = ''; $('#funil').innerHTML = '<div class="empty">Indisponível no modo demonstração.</div>'; return; }
+  const [al, fu] = await Promise.all([sb.rpc('painel_alertas'), sb.rpc('painel_funil', { p_dias: dias })]);
+  $('#alertas').innerHTML = (al.data || []).map(x => `<div class="banner alerta n${esc(x.nivel)}"><b>${esc(x.titulo)}</b> · ${esc(x.detalhe)}${x.conversa_id
+    ? ` <button class="btn btn-mini" data-abrir="${esc(x.conversa_id)}">Abrir conversa</button>` : ''}</div>`).join('');
+  document.querySelectorAll('[data-abrir]').forEach(b => b.addEventListener('click', () => { mostrarAba('conversas'); abrirConversa(b.dataset.abrir); }));
+  const f = fu.data;
+  if (!f) { $('#funil').innerHTML = `<div class="empty">${esc(fu.error?.message || 'Sem dados.')}</div>`; return; }
+  const etapas = [['Conversas com clientes', f.conversas], ['Com pré-agendamento', f.com_pre_agendamento],
+                  ['Comandas no Belasis', f.comandas_no_belasis], ['Confirmadas pela equipe', f.confirmadas]];
+  const max = Math.max(1, ...etapas.map(e => e[1]));
+  $('#funil').innerHTML = etapas.map(([l, v], i) => `<div class="fn"><div class="fn-l">${esc(l)}</div><div class="fn-b"><div class="bar" style="width:${Math.max(1, 100 * v / max)}%"></div></div>
+      <div class="fn-v">${fmt.format(v)}${i ? ` <span class="sub">${pct(v, etapas[i - 1][1])}</span>` : ''}</div></div>`).join('')
+    + `<div class="sub" style="margin-top:8px">Serviços pré-agendados: ${fmt.format(f.servicos_pre_agendados)} · Previsão pela tabela: ${brl(f.faturamento_previsto)}
+       · Conversas transferidas: ${fmt.format(f.transferidas)} · Canceladas: ${fmt.format(f.canceladas)}</div>`;
+}
+
+// ---------------------------------------------------------------- Conversas
+const cv = { filtro: 'todas', busca: '', sel: null };
+const AUTOR = { cliente: 'Cliente', bot: 'Agente', humano: 'Equipe', sistema: 'Mensagem automática' };
+const tagStatus = (c) => c.bot_desativado ? statusTag('critical', 'Sem agente (não quer IA)')
+  : c.status === 'bot' ? statusTag('good', 'Agente atendendo')
+  : c.status === 'aguardando_humano' ? statusTag('critical', 'Aguardando equipe')
+  : statusTag('warning', 'Equipe atendendo' + (c.pausado_ate ? ` · agente volta em ${minutosAte(c.pausado_ate)} min` : ''));
+async function carregarConversas() {
+  if (DEMO) { $('#cv-lista').innerHTML = '<div class="empty">Indisponível no modo demonstração.</div>'; return; }
+  const { data, error } = await sb.rpc('painel_conversas', { p_filtro: cv.filtro, p_busca: cv.busca || null });
+  if (error) { $('#cv-lista').innerHTML = `<div class="empty">Erro: ${esc(error.message)}</div>`; return; }
+  const lista = data || [];
+  $('#cv-lista').innerHTML = !lista.length ? '<div class="empty">Nenhuma conversa.</div>' : lista.map(c => `<button class="cvitem" data-id="${esc(c.id)}" aria-current="${c.id === cv.sel}">
+      <div style="display:flex;justify-content:space-between;gap:8px"><b>${esc(c.nome)}</b><span class="sub">${hora(c.ultima_msg_em)}</span></div>
+      <div class="sub clip">${c.ultimo_autor ? esc(AUTOR[c.ultimo_autor] || c.ultimo_autor) + ': ' : ''}${esc(c.ultimo_texto || '')}</div>
+      <div style="margin-top:4px">${tagStatus(c)}${c.pre_agendamentos ? ` <span class="pill">${c.pre_agendamentos} agendado(s)</span>` : ''}</div></button>`).join('');
+  document.querySelectorAll('.cvitem').forEach(b => b.addEventListener('click', () => abrirConversa(b.dataset.id)));
+  if (cv.sel) abrirConversa(cv.sel, true);
+}
+async function abrirConversa(id, silencioso) {
+  cv.sel = id;
+  document.querySelectorAll('.cvitem').forEach(b => b.setAttribute('aria-current', b.dataset.id === id));
+  if (!silencioso) $('#cv-det').innerHTML = '<div class="empty">Carregando…</div>';
+  const { data: c, error } = await sb.rpc('painel_conversa', { p_id: id });
+  if (error || !c) { $('#cv-det').innerHTML = `<div class="empty">Não consegui abrir. ${esc(error?.message || '')}</div>`; return; }
+  const antigo = $('#cv-chat'), noFim = !antigo || antigo.scrollTop + antigo.clientHeight >= antigo.scrollHeight - 20;
+  $('#cv-det').innerHTML = `<div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:center">
+      <div><h2>${esc(c.nome)}</h2><div class="sub"><a href="https://wa.me/${esc(c.telefone)}" target="_blank" rel="noopener">wa.me/${esc(c.telefone)}</a> · ${tagStatus(c)}</div></div>
+      <div class="controls">${c.status === 'bot' && !c.bot_desativado ? '<button class="btn" id="cv-assumir">Assumir conversa</button>' : '<button class="btn" id="cv-devolver">Devolver ao agente</button>'}</div></div>
+    <div class="desc" style="margin-top:6px">Quando a equipe responde pelo WhatsApp do salão, o agente pausa sozinho e só volta depois de 5 min sem resposta da equipe.</div>
+    ${c.handoffs.filter(h => !h.resolvido_em).map(h => `<div class="banner">Transferida: <b>${esc(MOTIVOS[h.motivo] || h.motivo)}</b>${h.resumo ? ' · ' + esc(h.resumo) : ''}</div>`).join('')}
+    <div class="chat" id="cv-chat">${c.mensagens.map(m => `<div class="bal ${m.autor === 'cliente' ? 'in' : m.autor === 'sistema' ? 'sistema' : 'out ' + esc(m.autor)}">${esc(m.texto || '[' + m.tipo + ']')}<small>${esc(AUTOR[m.autor] || m.autor)} · ${hora(m.em)}</small></div>`).join('') || '<div class="empty">Sem mensagens.</div>'}</div>
+    ${c.pre_agendamentos.length ? `<details><summary>Agendamentos pelo WhatsApp (${c.pre_agendamentos.length})</summary><table><tr><th>Serviço</th><th>Quando</th><th>Situação</th></tr>${c.pre_agendamentos.map(p => `<tr><td>${esc(p.servico)}<div class="sub">${esc(p.profissional || '')}</div></td><td>${ddmm(p.data)} ${esc(p.hora)}</td><td>${esc(p.escrita || p.estado)}</td></tr>`).join('')}</table></details>` : ''}`;
+  const chat = $('#cv-chat'); if (noFim || !silencioso) chat.scrollTop = chat.scrollHeight;
+  $('#cv-assumir')?.addEventListener('click', () => assumir(id, true));
+  $('#cv-devolver')?.addEventListener('click', () => assumir(id, false));
+}
+async function assumir(id, sim) {
+  if (!sim && !confirm('Devolver esta conversa ao agente de IA? Ele volta a responder agora.')) return;
+  const { error } = await sb.rpc('painel_assumir', { p_id: id, p_assumir: sim });
+  if (error) { alert('Não consegui: ' + error.message); return; }
+  carregarConversas();
+}
+document.querySelectorAll('[data-cv]').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('[data-cv]').forEach(x => x.setAttribute('aria-pressed', x === b)); cv.filtro = b.dataset.cv; carregarConversas(); }));
+let cvT; $('#cv-busca').addEventListener('input', (e) => { clearTimeout(cvT); cvT = setTimeout(() => { cv.busca = e.target.value.trim(); carregarConversas(); }, 300); });
+
+// ---------------------------------------------------------------- Configurações
+const cfg = { dados: null };
+const PAPEIS = { recepcao: 'Recepção', coordenacao: 'Coordenação', dona: 'Dona', atendimento: 'Atendimento', profissional: 'Profissional', ampliize: 'Ampliize' };
+const FUNCOES = { '': '—', cabeleireira: 'Cabeleireira', manicure: 'Manicure', recepcao: 'Recepção / interno (não atende)', atelie: 'Ateliê', teste: 'Teste (só se pedirem)' };
+const QUEM = { cabeleireiras: 'Todas as cabeleireiras', manicures: 'Todas as manicures', unica: 'Só uma profissional' };
+const opt = (obj, sel) => Object.entries(obj).map(([v, l]) => `<option value="${esc(v)}"${String(sel ?? '') === v ? ' selected' : ''}>${esc(l)}</option>`).join('');
+async function carregarConfig() {
+  if (DEMO) { $('#cfg-equipe').innerHTML = '<div class="empty">Indisponível no modo demonstração.</div>'; return; }
+  const { data, error } = await sb.rpc('painel_config');
+  if (error) { $('#cfg-equipe').innerHTML = `<div class="empty">Erro: ${esc(error.message)}</div>`; return; }
+  cfg.dados = data; renderConfig();
+}
+function renderConfig() {
+  const d = cfg.dados;
+  const linha = (e) => `<tr data-id="${esc(e.id ?? '')}"><td><input name="nome" value="${esc(e.nome)}" size="14" aria-label="Nome"></td>
+    <td><input name="telefone" value="${esc(e.telefone)}" size="14" inputmode="numeric" aria-label="Telefone"></td>
+    <td><select name="papel" aria-label="Papel">${opt(PAPEIS, e.papel)}</select></td>
+    <td><input name="prioridade" type="number" min="1" max="9" value="${esc(e.prioridade ?? 5)}" style="width:56px" aria-label="Prioridade"></td>
+    <td><select name="disponibilidade" aria-label="Quando recebe">${opt({ expediente: 'Horário do salão', '24h': '24h' }, e.disponibilidade)}</select></td>
+    <td><input name="recebe_handoff" type="checkbox"${e.recebe_handoff ? ' checked' : ''} aria-label="Recebe transferências"></td>
+    <td><input name="recebe_alertas_sistema" type="checkbox"${e.recebe_alertas_sistema ? ' checked' : ''} aria-label="Recebe alertas de falha"></td>
+    <td><input name="ativo" type="checkbox"${e.ativo ? ' checked' : ''} aria-label="Ativo"></td>
+    <td><button class="btn btn-mini" data-salvar-eq>${e.id ? 'Salvar' : 'Adicionar'}</button></td></tr>`;
+  $('#cfg-equipe').innerHTML = `<table class="cfg"><tr><th>Nome</th><th>Telefone</th><th>Papel</th><th>Prioridade</th><th>Quando</th><th>Transferências</th><th>Alertas de falha</th><th>Ativo</th><th></th></tr>
+    ${d.equipe.map(linha).join('')}${linha({ prioridade: 5, disponibilidade: 'expediente', recebe_handoff: true, ativo: true, papel: 'atendimento' })}</table>`;
+  document.querySelectorAll('[data-salvar-eq]').forEach(b => b.addEventListener('click', async () => {
+    const tr = b.closest('tr'), v = (n) => tr.querySelector(`[name=${n}]`);
+    const p = { id: tr.dataset.id || null, nome: v('nome').value.trim(), telefone: v('telefone').value.replace(/\D/g, ''), papel: v('papel').value,
+      prioridade: +v('prioridade').value || 5, disponibilidade: v('disponibilidade').value, recebe_handoff: v('recebe_handoff').checked,
+      recebe_alertas_sistema: v('recebe_alertas_sistema').checked, ativo: v('ativo').checked };
+    if (!p.nome || !p.telefone) { alert('Preencha nome e telefone (com 55 e DDD).'); return; }
+    await salvar(b, sb.rpc('painel_salvar_equipe', { p }), true);
+  }));
+  $('#cfg-gerentes').value = (d.gerentes || []).join('\n');
+  $('#cfg-prof').innerHTML = `<table class="cfg"><tr><th>Profissional</th><th>Função</th></tr>${d.profissionais.map(p => `<tr><td>${esc(p.nome)}<div class="sub">${esc(p.nome_completo)}</div></td>
+    <td><select data-prof="${esc(p.id)}" aria-label="Função de ${esc(p.nome)}">${opt(FUNCOES, p.funcao)}</select> <span class="sub" data-ok="${esc(p.id)}"></span></td></tr>`).join('')}</table>`;
+  document.querySelectorAll('[data-prof]').forEach(s => s.addEventListener('change', async () => {
+    const { error } = await sb.rpc('painel_salvar_funcao', { p_profissional_id: +s.dataset.prof, p_funcao: s.value || null });
+    $(`[data-ok="${s.dataset.prof}"]`).textContent = error ? 'Erro: ' + error.message : 'Salvo ✓';
+    if (!error) { const p = d.profissionais.find(x => String(x.id) === s.dataset.prof); if (p) p.funcao = s.value || null; renderServicos(); }
+  }));
+  const cats = [...new Set(d.servicos.map(s => s.categoria || 'Sem categoria'))].sort(), atual = $('#cfg-sv-cat').value;
+  $('#cfg-sv-cat').innerHTML = '<option value="">Todas</option>' + cats.map(c => `<option${c === atual ? ' selected' : ''}>${esc(c)}</option>`).join('');
+  renderServicos();
+}
+function renderServicos() {
+  const d = cfg.dados; if (!d) return;
+  const busca = $('#cfg-sv-busca').value.trim().toLowerCase(), cat = $('#cfg-sv-cat').value;
+  const profs = Object.fromEntries([['', '—'], ...d.profissionais.filter(p => p.funcao && p.funcao !== 'recepcao').map(p => [String(p.id), p.nome])]);
+  const lista = d.servicos.filter(s => (!cat || (s.categoria || 'Sem categoria') === cat) && (!busca || s.servico.toLowerCase().includes(busca)));
+  $('#cfg-serv').innerHTML = !lista.length ? '<div class="empty">Nenhum serviço.</div>' : `<table class="cfg"><tr><th>Serviço</th><th>Quem faz</th><th>Profissional (se só uma)</th><th>Sem preferência, primeiro</th><th></th></tr>${lista.map(s => `<tr data-sv="${esc(s.id)}">
+    <td>${esc(s.servico)}<div class="sub">${esc(s.categoria || '')}${s.quem ? (s.da_planilha ? '' : ' · regra padrão') : ' · sem regra'}</div></td>
+    <td><select name="quem" aria-label="Quem faz">${opt(QUEM, s.quem || 'cabeleireiras')}</select></td>
+    <td><select name="unica" aria-label="Profissional única">${opt(profs, s.profissional_id)}</select></td>
+    <td><select name="pri" aria-label="Prioritária sem preferência">${opt(profs, s.prioritaria)}</select></td>
+    <td><button class="btn btn-mini" data-salvar-sv>Salvar</button></td></tr>`).join('')}</table>`;
+  document.querySelectorAll('[data-salvar-sv]').forEach(b => b.addEventListener('click', async () => {
+    const tr = b.closest('tr'), g = (n) => tr.querySelector(`[name=${n}]`).value;
+    const ok = await salvar(b, sb.rpc('painel_salvar_regra', { p_servico_id: +tr.dataset.sv, p_quem: g('quem'),
+      p_profissional_id: g('unica') ? +g('unica') : null, p_prioritaria: g('pri') ? +g('pri') : null }), false);
+    if (ok) { const s = d.servicos.find(x => String(x.id) === tr.dataset.sv); Object.assign(s, { quem: g('quem'), profissional_id: g('unica') ? +g('unica') : null, prioritaria: g('pri') ? +g('pri') : null, da_planilha: true }); }
+  }));
+}
+async function salvar(btn, promessa, recarregar) {
+  const texto = btn.textContent; btn.disabled = true;
+  const { data, error } = await promessa; btn.disabled = false;
+  if (error || (data && data.ok === false)) { alert('Não salvei: ' + (error?.message || data?.erro || '')); return false; }
+  btn.textContent = 'Salvo ✓'; setTimeout(() => { btn.textContent = texto; }, 1500);
+  if (recarregar) carregarConfig();
+  return true;
+}
+$('#cfg-sv-busca').addEventListener('input', renderServicos);
+$('#cfg-sv-cat').addEventListener('change', renderServicos);
+$('#cfg-ger-salvar').addEventListener('click', async () => {
+  const tels = $('#cfg-gerentes').value.split(/[\n,;]+/).map(t => t.replace(/\D/g, '')).filter(Boolean);
+  const { data, error } = await sb.rpc('painel_salvar_gerentes', { p_telefones: tels });
+  $('#cfg-ger-msg').textContent = error ? 'Erro: ' + error.message : 'Salvo ✓ ' + (data?.gerentes || []).length + ' número(s)';
+});
 
 // ---------------------------------------------------------------- Agenda (réplica do Belasis)
 const ag = { dia: hojeISO(), ate: addDias(hojeISO(), 6), vis: 'grade', prof: '', status: '', dados: null };
@@ -728,7 +946,9 @@ async function load() {
     if (aba === 'agenda') carregarAgenda(); else if (aba === 'ranking') carregarRanking(); return; }
   const { data, error } = await sb.rpc('dashboard_dados', { p_dias: dias });
   if (error) { $('#sub').textContent = error.message.includes('acesso_negado') ? 'Seu e-mail não tem acesso a este painel.' : 'Erro ao carregar: ' + error.message; return; }
+  carregarExtras();
   render(data);
+  if (aba === 'conversas') carregarConversas();
   const rb = await sb.rpc('dashboard_belasis', { p_dias: Math.max(dias, 7) });
   ultimoB = rb.error ? null : rb.data; renderBelasis(ultimoB);
   if (aba === 'agenda') carregarAgenda(); else if (aba === 'ranking') carregarRanking();
