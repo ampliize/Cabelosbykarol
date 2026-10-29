@@ -491,6 +491,7 @@ function renderBelasis(b) {
       <td>${esc(r.servico)}${r.profissional ? `<div class="sub">${esc(r.profissional)}</div>` : ''}</td><td>${r.data.split('-').reverse().slice(0, 2).join('/')} ${r.hora}</td>
       <td>${r.escrita === 'falhou' ? statusTag('critical', 'Não entrou: lançar manual') + `<div class="sub clip" title="${esc(r.erro)}">${esc(r.erro)}</div>`
           : r.escrita === 'na_fila' ? statusTag('warning', 'Enviando ao Belasis…')
+          : r.escrita === 'aguardando_comanda' ? statusTag('warning', 'Montando comanda…')
           : statusTag(...({ pendente: ['warning', 'Lançar no Belasis'], lancado: ['good', 'No Belasis (não confirmado)'], recusado: ['critical', 'Recusado'], cancelado: ['serious', 'Cancelado'] }[r.estado] || ['warning', r.estado]))}</td></tr>`).join('') + '</table>';
 }
 
