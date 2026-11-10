@@ -160,10 +160,13 @@ th.sort::after { content: ' ↕'; color: var(--text-muted); font-size: 10px; }
 <body>
 <div id="login" class="card" hidden>
   <h2>Painel do Agente · Cabelos by Karol</h2>
-  <div class="desc">Entre com o e-mail cadastrado. Você vai receber um link (ou um código) por e-mail.</div>
-  <form id="f-email"><input id="email" type="email" placeholder="seu@email.com" required autocomplete="email"><button class="btn" type="submit">Receber código</button></form>
-  <form id="f-otp" hidden><input id="otp" inputmode="numeric" placeholder="Código do e-mail" required autocomplete="one-time-code"><button class="btn" type="submit">Entrar</button></form>
-  <div class="msg" id="login-msg"></div>
+  <div class="desc">Entre com o e-mail e a senha fornecidos pelo administrador.</div>
+  <form id="f-login">
+    <input id="email" type="email" placeholder="seu@email.com" required autocomplete="username" aria-label="E-mail">
+    <input id="password" type="password" placeholder="Sua senha" required autocomplete="current-password" aria-label="Senha" minlength="8">
+    <button class="btn" id="login-submit" type="submit">Entrar no painel</button>
+  </form>
+  <div class="msg" id="login-msg" role="status" aria-live="polite"></div>
 </div>
 
 <div class="wrap" id="app" hidden>
@@ -967,21 +970,37 @@ async function start() {
   if (!window.supabase || !window.supabase.createClient) {
     $('#login').hidden = false;
     $('#login-msg').textContent = 'Não foi possível carregar o Supabase (sem internet ou bloqueio de rede). Tente recarregar.';
-    $('#f-email').hidden = true; return;
+    $('#f-login').hidden = true; return;
   }
   sb = supabase.createClient(CBK_CONFIG.supabaseUrl, CBK_CONFIG.supabaseKey);
   const { data: { session } } = await sb.auth.getSession();
   if (session) { $('#app').hidden = false; load(); } else { $('#login').hidden = false; }
   sb.auth.onAuthStateChange((ev, sess) => { if (ev === 'SIGNED_IN' && sess && $('#app').hidden) { $('#login').hidden = true; $('#app').hidden = false; load(); } });
   $('#logout').addEventListener('click', async () => { await sb.auth.signOut(); location.reload(); });
-  $('#f-email').addEventListener('submit', async (e) => { e.preventDefault();
-    const { error } = await sb.auth.signInWithOtp({ email: $('#email').value.trim(), options: { shouldCreateUser: false, emailRedirectTo: location.origin + location.pathname } });
-    $('#login-msg').textContent = error ? 'Não foi possível enviar: ' + error.message : 'Enviamos um e-mail: clique no link ou digite o código abaixo.';
-    if (!error) { $('#f-email').hidden = true; $('#f-otp').hidden = false; } });
-  $('#f-otp').addEventListener('submit', async (e) => { e.preventDefault();
-    const { error } = await sb.auth.verifyOtp({ email: $('#email').value.trim(), token: $('#otp').value.trim(), type: 'email' });
-    if (error) { $('#login-msg').textContent = 'Código inválido.'; return; }
-    $('#login').hidden = true; $('#app').hidden = false; load(); });
+  $('#f-login').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = $('#email').value.trim().toLowerCase();
+    const password = $('#password').value;
+    const button = $('#login-submit');
+    button.disabled = true;
+    button.textContent = 'Verificando…';
+    $('#login-msg').textContent = '';
+    const { error } = await sb.auth.signInWithPassword({ email, password });
+    button.disabled = false;
+    button.textContent = 'Entrar no painel';
+    if (error) {
+      const code = error.code || '';
+      if (code === 'email_not_confirmed') {
+        $('#login-msg').textContent = 'Este e-mail ainda não foi confirmado pelo administrador. Entre em contato com a Ampliize.';
+      } else if (code === 'invalid_credentials') {
+        $('#login-msg').textContent = 'E-mail ou senha incorretos. Confira os dados ou solicite ajuda ao administrador.';
+      } else if (code === 'too_many_requests') {
+        $('#login-msg').textContent = 'Muitas tentativas. Aguarde alguns minutos e tente novamente.';
+      } else {
+        $('#login-msg').textContent = 'Não foi possível entrar agora. Tente novamente ou entre em contato com o administrador.';
+      }
+    }
+  });
 }
 start();
 mostrarAba(aba);
