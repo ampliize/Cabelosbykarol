@@ -49,3 +49,7 @@ $function$;
 
 revoke all on function public.painel_enviar_mensagem(uuid, text) from public, anon;
 grant execute on function public.painel_enviar_mensagem(uuid, text) to authenticated;
+
+-- n8n (12/11): CBK · WhatsApp Conexão (webhook cbk-whatsapp-conexao-q4t8z1) — o painel consulta, conecta
+-- (QR Code, aponta o webhook do CBK · WA Entrada com base64) e desconecta o WhatsApp na Evolution.
+-- O fluxo só atende quem passa em painel_autorizado (token do Supabase do usuário logado).

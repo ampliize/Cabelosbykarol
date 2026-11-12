@@ -5,27 +5,28 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Painel Cabelos by Karol</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 <style>
 :root {
   color-scheme: light;
-  --bg: #ffffff;
+  --bg: #fdfbfa;
   --surface-1: #ffffff;
-  --surface-2: #f8fafc;
-  --border: #e5e7eb;
-  --side: #ffffff; --side-text: #475569; --side-active: #1d4ed8; --brand: #0f172a;
-  --grid: #f1f5f9;
-  --text-primary: #0f172a;
-  --text-secondary: #475569;
-  --text-muted: #64748b;
-  --series-1: #2a78d6;   /* conversas */
-  --series-2: #eb6834;   /* transferências */
-  --series-3: #1baf7a;   /* agendamentos */
-  --seq-0: #f0efec; --seq-1: #cde2fb; --seq-2: #9ec5f4; --seq-3: #6da7ec; --seq-4: #3987e5; --seq-5: #256abf; --seq-6: #184f95;
-  --good: #0ca30c; --warning: #fab219; --serious: #ec835a; --critical: #d03b3b;
-  --accent: #2563eb;
+  --surface-2: #faf5f3;
+  --border: #efe6e2;
+  --line: #e4d8d3;
+  --side: #fbf6f4; --side-text: #6b5a60; --side-active: #a8476b; --brand: #c0567a;
+  --grid: #f5eeeb;
+  --text-primary: #2b2024;
+  --text-secondary: #6b5a60;
+  --text-muted: #9a898e;
+  --series-1: #c0567a;   /* conversas */
+  --series-2: #c99a3e;   /* transferências */
+  --series-3: #5f9f88;   /* agendamentos */
+  --seq-0: #f6efed; --seq-1: #f6dbe3; --seq-2: #eebccb; --seq-3: #e29bb1; --seq-4: #cf7495; --seq-5: #b2577a; --seq-6: #8a3f5d;
+  --good: #4f9a7f; --warning: #d6a23c; --serious: #d98366; --critical: #c94a5a;
+  --accent: #c0567a; --accent-soft: #fbeef2; --accent-strong: #a8476b; --plum: #6d4c7d;
 }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
@@ -33,31 +34,37 @@ body { margin: 0; background: var(--bg); color: var(--text-primary);
   font: 14px/1.45 Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
 .shell { display: grid; grid-template-columns: 232px minmax(0, 1fr); min-height: 100vh; }
 .shell > * { min-width: 0; }
+.wa { display: flex; gap: 28px; flex-wrap: wrap; align-items: flex-start; }
+.wa-info { display: flex; flex-direction: column; gap: 10px; min-width: 220px; }
+.wa-info .controls { margin-top: 4px; }
+.wa-qr { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; max-width: 560px; }
+.wa-qr img { width: 240px; height: 240px; border-radius: 18px; border: 1px solid var(--border); padding: 10px; background: #fff; }
 @media (min-width: 1000px) { #kpis { grid-template-columns: repeat(3, 1fr); } #ops { grid-template-columns: repeat(4, 1fr); } }
-.sec { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--text-muted); margin: 22px 0 10px; }
+.sec { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .12em; color: var(--accent-strong); margin: 26px 0 12px; display: flex; align-items: center; gap: 10px; }
+.sec::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 #tab-atendimento > .sec:first-of-type { margin-top: 4px; }
-.login { min-height: 100vh; display: grid; place-items: center; background: var(--surface-2); padding: 16px; }
-.login-card { width: 100%; max-width: 380px; background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 28px; box-shadow: 0 10px 30px rgb(15 23 42 / .06); }
-.login-card h2 { margin: 18px 0 14px; font-size: 18px; }
+.login { min-height: 100vh; display: grid; place-items: center; background: radial-gradient(1200px 600px at 20% 0%, #fbe9ef 0%, transparent 60%), radial-gradient(900px 500px at 100% 100%, #f1e9f5 0%, transparent 60%), var(--bg); padding: 16px; }
+.login-card { width: 100%; max-width: 390px; background: #fff; border: 1px solid var(--border); border-radius: 22px; padding: 32px; box-shadow: 0 10px 30px rgb(120 60 80 / .08); }
+.login-card h2 { margin: 22px 0 16px; font-family: Fraunces, Georgia, serif; font-size: 24px; font-weight: 600; }
 .login-card label { display: block; font-size: 13px; font-weight: 500; color: var(--text-secondary); margin-bottom: 12px; }
-.login-card input { display: block; width: 100%; margin-top: 6px; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 8px; font: inherit; }
-.login-card input:focus, .composer textarea:focus { outline: 2px solid #bfdbfe; border-color: var(--accent); }
+.login-card input { display: block; width: 100%; margin-top: 6px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; font: inherit; }
+.login-card input:focus, .composer textarea:focus { outline: 2px solid #f3cfdb; border-color: var(--accent); }
 .login-card .btn { width: 100%; padding: 10px; margin-top: 4px; }
 .composer { display: flex; gap: 8px; align-items: flex-end; border-top: 1px solid var(--border); padding-top: 12px; margin-top: 8px; }
-.composer textarea { flex: 1; min-width: 0; resize: vertical; border: 1px solid #d1d5db; border-radius: 8px; padding: 9px 11px; font: inherit; min-height: 42px; }
+.composer textarea { flex: 1; min-width: 0; resize: vertical; border: 1px solid var(--line); border-radius: 8px; padding: 9px 11px; font: inherit; min-height: 42px; }
 .side-foot .pill:empty { display: none; }
 .side { background: var(--side); color: var(--side-text); padding: 20px 12px; position: sticky; top: 0; height: 100vh;
   display: flex; flex-direction: column; gap: 18px; border-right: 1px solid var(--border); }
 .brand { display: flex; gap: 10px; align-items: center; padding: 0 8px; }
-.brand .logo { width: 36px; height: 36px; border-radius: 10px; background: var(--brand); color: #fff; display: grid; place-items: center;
+.brand .logo { width: 38px; height: 38px; border-radius: 12px; background: linear-gradient(135deg, #d7739a, #a8476b); color: #fff; font-family: Fraunces, Georgia, serif; display: grid; place-items: center;
   font-weight: 700; letter-spacing: .02em; }
-.brand b { display: block; color: var(--text-primary); font-size: 14px; }
+.brand b { display: block; color: var(--text-primary); font-family: Fraunces, Georgia, serif; font-size: 17px; font-weight: 600; }
 .brand span { font-size: 11px; color: var(--side-text); }
 .side .tabs { flex-direction: column; border: 0; margin: 0; gap: 2px; overflow: visible; }
 .side .tabs button { display: flex; align-items: center; gap: 10px; color: var(--side-text); padding: 9px 12px; border-radius: 8px;
   border: 0; margin: 0; font-weight: 500; text-align: left; }
 .side .tabs button:hover { background: var(--surface-2); color: var(--text-primary); }
-.side .tabs button[aria-selected="true"] { background: #eff6ff; color: var(--side-active); font-weight: 600; }
+.side .tabs button[aria-selected="true"] { background: var(--accent-soft); color: var(--side-active); font-weight: 600; }
 .ic { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .side-foot { margin-top: auto; display: flex; flex-direction: column; gap: 8px; padding: 0 4px; }
 .side-foot .pill { justify-content: center; }
@@ -76,30 +83,30 @@ body { margin: 0; background: var(--bg); color: var(--text-primary);
 }
 .wrap { max-width: 1200px; margin: 0 auto; padding: 20px 16px 48px; }
 header { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-h1 { font-size: 22px; margin: 0; font-weight: 700; letter-spacing: -0.01em; }
+h1 { font-family: Fraunces, Georgia, serif; font-size: 28px; margin: 0; font-weight: 600; letter-spacing: -0.01em; color: var(--text-primary); }
 .sub { color: var(--text-secondary); font-size: 13px; }
 .controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-.seg { display: inline-flex; border: 1px solid #d1d5db; border-radius: 8px; overflow: hidden; background: #fff; box-shadow: 0 1px 2px rgb(15 23 42 / .05); }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: #fff; box-shadow: 0 1px 2px rgb(120 60 80 / .06); }
 .seg button { border: 0; background: none; color: var(--text-secondary); padding: 6px 12px; font: inherit; cursor: pointer; }
-.seg button[aria-pressed="true"] { background: #eff6ff; color: var(--side-active); font-weight: 600; }
-.btn { border: 1px solid #d1d5db; background: #fff; color: var(--text-primary); padding: 7px 14px; border-radius: 8px; font: inherit; font-weight: 500;
-  cursor: pointer; box-shadow: 0 1px 2px rgb(15 23 42 / .05); transition: background .15s, border-color .15s; }
-.btn:hover { background: var(--surface-2); border-color: #9ca3af; }
+.seg button[aria-pressed="true"] { background: var(--accent-soft); color: var(--side-active); font-weight: 600; }
+.btn { border: 1px solid var(--line); background: #fff; color: var(--text-primary); padding: 7px 14px; border-radius: 10px; font: inherit; font-weight: 500;
+  cursor: pointer; box-shadow: 0 1px 2px rgb(120 60 80 / .06); transition: background .15s, border-color .15s; }
+.btn:hover { background: var(--surface-2); border-color: #cbb7b0; }
 .btn:disabled { opacity: .6; cursor: default; }
 .btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
-.btn-primary:hover { background: #1d4ed8; border-color: #1d4ed8; }
-.btn-emerg { font-weight: 600; color: var(--critical); background: #fff; border-color: #fca5a5; }
-.btn-emerg:hover { background: #fef2f2; border-color: var(--critical); }
+.btn-primary:hover { background: var(--accent-strong); border-color: var(--accent-strong); }
+.btn-emerg { font-weight: 600; color: var(--critical); background: #fff; border-color: #efb3bc; }
+.btn-emerg:hover { background: #fdf0f2; border-color: var(--critical); }
 .btn-emerg[data-ligar] { color: #fff; background: var(--good); border-color: var(--good); }
 .pill { display: inline-flex; gap: 6px; align-items: center; padding: 3px 10px; border-radius: 999px; font-size: 12px; border: 1px solid var(--border); background: var(--surface-1); color: var(--text-secondary); }
 .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
 .grid { display: grid; gap: 12px; }
 .kpis { grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); margin-bottom: 12px; }
-.card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; min-width: 0; box-shadow: 0 1px 2px rgb(15 23 42 / .04); }
-.card h2 { font-size: 15px; font-weight: 600; margin: 0 0 2px; }
+.card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 18px; padding: 20px 22px; min-width: 0; box-shadow: 0 1px 2px rgb(120 60 80 / .04), 0 8px 24px rgb(120 60 80 / .04); }
+.card h2 { font-size: 15px; font-weight: 600; margin: 0 0 2px; color: var(--text-primary); }
 .card .desc { color: var(--text-muted); font-size: 12px; margin-bottom: 10px; }
 .kpi .label { color: var(--text-muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
-.kpi .value { font-size: clamp(20px, 2.1vw, 28px); overflow-wrap: anywhere; font-weight: 650; letter-spacing: -0.02em; margin-top: 2px; font-variant-numeric: tabular-nums; }
+.kpi .value { font-family: Fraunces, Georgia, serif; color: var(--accent-strong); font-size: clamp(24px, 2.4vw, 32px); overflow-wrap: anywhere; font-weight: 650; letter-spacing: -0.02em; margin-top: 2px; font-variant-numeric: tabular-nums; }
 .kpi .hint { color: var(--text-muted); font-size: 12px; }
 .status { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; color: var(--text-primary); }
 .two { grid-template-columns: 2fr 1fr; margin-bottom: 12px; }
@@ -300,6 +307,11 @@ th.sort::after { content: ' ↕'; color: var(--text-muted); font-size: 10px; }
   </div>
 
   <div id="tab-config" hidden>
+    <section class="card" style="margin-bottom:12px">
+      <h2>WhatsApp do salão</h2>
+      <div class="desc">Conecte aqui o número que atende as clientes. A chave da Evolution fica protegida no servidor.</div>
+      <div class="wa" id="wa-box"><div class="empty">Carregando…</div></div>
+    </section>
     <section class="card" style="margin-bottom:12px">
       <h2>Minha senha</h2>
       <div class="desc">Troque a senha de acesso a este painel (mínimo 8 caracteres).</div>
@@ -730,7 +742,53 @@ const PAPEIS = { recepcao: 'Recepção', coordenacao: 'Coordenação', dona: 'Do
 const FUNCOES = { '': '—', cabeleireira: 'Cabeleireira', manicure: 'Manicure', recepcao: 'Recepção / interno (não atende)', atelie: 'Ateliê', teste: 'Teste (só se pedirem)' };
 const QUEM = { cabeleireiras: 'Todas as cabeleireiras', manicures: 'Todas as manicures', unica: 'Só uma profissional' };
 const opt = (obj, sel) => Object.entries(obj).map(([v, l]) => `<option value="${esc(v)}"${String(sel ?? '') === v ? ' selected' : ''}>${esc(l)}</option>`).join('');
+const WA_URL = 'https://n8n-n8n.dgwpoe.easypanel.host/webhook/cbk-whatsapp-conexao-q4t8z1';
+const WA_EST = { open: ['good', 'Conectado'], connecting: ['warning', 'Aguardando leitura do QR Code'], close: ['critical', 'Desconectado'],
+  inexistente: ['critical', 'Instância não existe na Evolution'], desconhecido: ['warning', 'Sem resposta da Evolution'] };
+let waTimer = null;
+async function waChamar(acao) {
+  const { data: { session } } = await sb.auth.getSession();
+  const r = await fetch(WA_URL, { method: 'POST', headers: { 'Content-Type': 'application/json', apikey: CBK_CONFIG.supabaseKey,
+    Authorization: 'Bearer ' + (session?.access_token || '') }, body: JSON.stringify({ acao }) });
+  let j = {}; try { j = await r.json(); } catch (e) {}
+  if (!r.ok && !j.erro) j.erro = 'Falha ' + r.status;
+  return j;
+}
+function waRender(j, qr) {
+  const [lv, txt] = WA_EST[j.estado] || ['warning', j.erro || 'Sem informação'];
+  const conectado = j.estado === 'open';
+  $('#wa-box').innerHTML = `<div class="wa-info">
+      <div>${statusTag(lv, txt)}</div>
+      ${j.numero ? `<div><b>${esc(j.nome || 'WhatsApp')}</b><div class="sub">+${esc(j.numero)}</div></div>` : ''}
+      ${j.instancia ? `<div class="sub">Instância: ${esc(j.instancia)}</div>` : ''}
+      ${j.erro && !conectado ? `<div class="sub">${esc(j.erro)}</div>` : ''}
+      <div class="controls">${conectado ? '<button class="btn" id="wa-desc">Desconectar</button>' : '<button class="btn btn-primary" id="wa-con">Conectar · gerar QR Code</button>'}
+        <button class="btn" id="wa-atual">Atualizar</button></div></div>
+    ${qr ? `<div class="wa-qr"><img src="${esc(qr)}" alt="QR Code para conectar o WhatsApp"><div class="sub">No celular do salão abra o WhatsApp → Aparelhos conectados → Conectar um aparelho e aponte para o código.${j.pairing ? '<br>Ou use o código de pareamento: <b>' + esc(j.pairing) + '</b>' : ''}<br>O código vence em cerca de 40 s: se vencer, gere de novo.</div></div>` : ''}`;
+  $('#wa-con')?.addEventListener('click', waConectar);
+  $('#wa-desc')?.addEventListener('click', async () => {
+    if (!confirm('Desconectar o WhatsApp do salão? O agente para de receber mensagens até conectar de novo.')) return;
+    waRender(await waChamar('desconectar').catch(e => ({ erro: e.message }))); });
+  $('#wa-atual').addEventListener('click', waStatus);
+}
+async function waStatus() {
+  if (DEMO) { $('#wa-box').innerHTML = '<div class="empty">Indisponível no modo demonstração.</div>'; return; }
+  waRender(await waChamar('status').catch(e => ({ erro: 'Não consegui falar com o servidor: ' + e.message })));
+}
+async function waConectar() {
+  $('#wa-box').innerHTML = '<div class="empty">Gerando QR Code…</div>';
+  const j = await waChamar('conectar').catch(e => ({ erro: e.message }));
+  if (j.estado === 'open') { waStatus(); return; }
+  waRender(j, j.qr);
+  clearInterval(waTimer); let n = 0;
+  waTimer = setInterval(async () => {
+    n++; const st = await waChamar('status').catch(() => ({}));
+    if (st.estado === 'open') { clearInterval(waTimer); waRender(st); }
+    else if (n >= 40 || aba !== 'config') clearInterval(waTimer);
+  }, 3000);
+}
 async function carregarConfig() {
+  waStatus();
   if (DEMO) { $('#cfg-equipe').innerHTML = '<div class="empty">Indisponível no modo demonstração.</div>'; return; }
   const { data, error } = await sb.rpc('painel_config');
   if (error) { $('#cfg-equipe').innerHTML = `<div class="empty">Erro: ${esc(error.message)}</div>`; return; }
