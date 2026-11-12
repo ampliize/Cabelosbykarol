@@ -688,6 +688,9 @@ async function carregarConversas() {
   const { data, error } = await sb.rpc('painel_conversas', { p_filtro: cv.filtro, p_busca: cv.busca || null });
   if (error) { $('#cv-lista').innerHTML = `<div class="empty">Erro: ${esc(error.message)}</div>`; return; }
   const lista = data || [];
+  const sigLista = JSON.stringify([cv.sel, lista.map(c => [c.id, c.ultima_msg_em, c.ultimo_texto, c.status, c.pausado_ate, c.pre_agendamentos])]);
+  if (cv.sigLista === sigLista) { if (cv.sel) abrirConversa(cv.sel, true); return; }
+  cv.sigLista = sigLista;
   $('#cv-lista').innerHTML = !lista.length ? '<div class="empty">Nenhuma conversa.</div>' : lista.map(c => `<button class="cvitem" data-id="${esc(c.id)}" aria-current="${c.id === cv.sel}">
       <div style="display:flex;justify-content:space-between;gap:8px"><b>${esc(c.nome)}</b><span class="sub">${hora(c.ultima_msg_em)}</span></div>
       <div class="sub clip">${c.ultimo_autor ? esc(AUTOR[c.ultimo_autor] || c.ultimo_autor) + ': ' : ''}${esc(c.ultimo_texto || '')}</div>
@@ -700,7 +703,14 @@ async function abrirConversa(id, silencioso) {
   document.querySelectorAll('.cvitem').forEach(b => b.setAttribute('aria-current', b.dataset.id === id));
   if (!silencioso) $('#cv-det').innerHTML = '<div class="empty">Carregando…</div>';
   const { data: c, error } = await sb.rpc('painel_conversa', { p_id: id });
-  if (error || !c) { $('#cv-det').innerHTML = `<div class="empty">Não consegui abrir. ${esc(error?.message || '')}</div>`; return; }
+  if (error || !c) { if (!silencioso) $('#cv-det').innerHTML = `<div class="empty">Não consegui abrir. ${esc(error?.message || '')}</div>`; return; }
+  if (cv.sel !== id) return;
+  // atualização em tempo real: só redesenha quando algo mudou (não atrapalha quem está digitando)
+  const ult = c.mensagens[c.mensagens.length - 1];
+  const assinatura = [id, c.mensagens.length, ult?.em, ult?.texto, c.status, c.pausado_ate, c.bot_desativado, c.handoffs.length, c.pre_agendamentos.length].join('|');
+  if (silencioso && cv.assinatura === assinatura) return;
+  cv.assinatura = assinatura;
+  const focado = document.activeElement?.id === 'cv-texto', cursor = focado ? $('#cv-texto').selectionStart : 0;
   const antigo = $('#cv-chat'), noFim = !antigo || antigo.scrollTop + antigo.clientHeight >= antigo.scrollHeight - 20;
   const rascunho = cv.rascunhoDe === id ? ($('#cv-texto')?.value || '') : '';
   $('#cv-det').innerHTML = `<div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:center">
@@ -714,6 +724,7 @@ async function abrirConversa(id, silencioso) {
     ${c.pre_agendamentos.length ? `<details><summary>Agendamentos pelo WhatsApp (${c.pre_agendamentos.length})</summary><table><tr><th>Serviço</th><th>Quando</th><th>Situação</th></tr>${c.pre_agendamentos.map(p => `<tr><td>${esc(p.servico)}<div class="sub">${esc(p.profissional || '')}</div></td><td>${ddmm(p.data)} ${esc(p.hora)}</td><td>${esc(p.escrita || p.estado)}</td></tr>`).join('')}</table></details>` : ''}`;
   const chat = $('#cv-chat'); if (noFim || !silencioso) chat.scrollTop = chat.scrollHeight;
   cv.rascunhoDe = id; if (rascunho) $('#cv-texto').value = rascunho;
+  if (focado) { const t = $('#cv-texto'); t.focus(); t.setSelectionRange(cursor, cursor); }
   $('#cv-texto').addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); $('#cv-form').requestSubmit(); } });
   $('#cv-form').addEventListener('submit', async (e) => { e.preventDefault();
     const txt = $('#cv-texto').value.trim(); if (!txt) return;
@@ -1089,7 +1100,10 @@ document.querySelectorAll('[data-dias]').forEach(b => b.addEventListener('click'
   document.querySelectorAll('[data-dias]').forEach(x => x.setAttribute('aria-pressed', x === b));
   dias = +b.dataset.dias; load(); }));
 $('#refresh').addEventListener('click', load);
-setInterval(() => { if (!document.hidden && !$('#app').hidden) load(); }, 60000);
+setInterval(() => { if (!document.hidden && !$('#app').hidden) load(); }, 30000);
+// conversas quase em tempo real: lista e conversa aberta a cada 5 s enquanto a aba estiver visível
+setInterval(() => { if (!DEMO && !document.hidden && !$('#app').hidden && aba === 'conversas') carregarConversas(); }, 5000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden && !$('#app').hidden) load(); });
 
 async function start() {
   if (DEMO) { $('#logout').hidden = true; $('#app').hidden = false; load(); return; }
