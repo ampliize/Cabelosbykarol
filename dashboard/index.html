@@ -5,34 +5,36 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Painel Cabelos by Karol</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 <style>
 :root {
   color-scheme: light;
-  --bg: #fdfbfa;
-  --surface-1: #ffffff;
-  --surface-2: #faf5f3;
-  --border: #efe6e2;
-  --line: #e4d8d3;
-  --side: #fbf6f4; --side-text: #6b5a60; --side-active: #a8476b; --brand: #c0567a;
-  --grid: #f5eeeb;
-  --text-primary: #2b2024;
-  --text-secondary: #6b5a60;
-  --text-muted: #9a898e;
-  --series-1: #c0567a;   /* conversas */
-  --series-2: #c99a3e;   /* transferências */
-  --series-3: #5f9f88;   /* agendamentos */
-  --seq-0: #f6efed; --seq-1: #f6dbe3; --seq-2: #eebccb; --seq-3: #e29bb1; --seq-4: #cf7495; --seq-5: #b2577a; --seq-6: #8a3f5d;
-  --good: #4f9a7f; --warning: #d6a23c; --serious: #d98366; --critical: #c94a5a;
-  --accent: #c0567a; --accent-soft: #fbeef2; --accent-strong: #a8476b; --plum: #6d4c7d;
+  --bg: #f8f3ee;
+  --surface-1: #fffdfb;
+  --surface-2: #f4ece5;
+  --border: #ece0d6;
+  --line: #e0d1c4;
+  --side: #2f211e; --side-text: #d9c8bb; --side-active: #f3e3c7; --brand: #b5687a;
+  --grid: #f2e9e1;
+  --text-primary: #3b2a25;
+  --text-secondary: #6f5a52;
+  --text-muted: #a08c82;
+  --series-1: #b5687a;   /* conversas */
+  --series-2: #b8935a;   /* transferências */
+  --series-3: #7c9a86;   /* pré-agendamentos */
+  --seq-0: #f5ece6; --seq-1: #efd9d6; --seq-2: #e5bcc0; --seq-3: #d69ba3; --seq-4: #c07a86; --seq-5: #a35d6b; --seq-6: #7d4350;
+  --good: #5f9478; --warning: #c9973f; --serious: #cf8466; --critical: #b9474f;
+  --accent: #b5687a; --accent-soft: #f7e8ea; --accent-strong: #94505f; --plum: #6d4c7d;
+  --gold: #b8935a; --champagne: #efe1c8; --cocoa: #3b2a25;
+  --shadow: 0 1px 2px rgb(91 58 46 / .05), 0 12px 32px rgb(91 58 46 / .06);
 }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 body { margin: 0; background: var(--bg); color: var(--text-primary);
-  font: 14px/1.45 Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
-.shell { display: grid; grid-template-columns: 232px minmax(0, 1fr); min-height: 100vh; }
+  font: 14.5px/1.5 Jost, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+.shell { display: grid; grid-template-columns: 252px minmax(0, 1fr); min-height: 100vh; }
 .shell > * { min-width: 0; }
 .wa { display: flex; gap: 28px; flex-wrap: wrap; align-items: flex-start; }
 .wa-info { display: flex; flex-direction: column; gap: 10px; min-width: 220px; }
@@ -45,7 +47,7 @@ body { margin: 0; background: var(--bg); color: var(--text-primary);
 #tab-atendimento > .sec:first-of-type { margin-top: 4px; }
 .login { min-height: 100vh; display: grid; place-items: center; background: radial-gradient(1200px 600px at 20% 0%, #fbe9ef 0%, transparent 60%), radial-gradient(900px 500px at 100% 100%, #f1e9f5 0%, transparent 60%), var(--bg); padding: 16px; }
 .login-card { width: 100%; max-width: 390px; background: #fff; border: 1px solid var(--border); border-radius: 22px; padding: 32px; box-shadow: 0 10px 30px rgb(120 60 80 / .08); }
-.login-card h2 { margin: 22px 0 16px; font-family: Fraunces, Georgia, serif; font-size: 24px; font-weight: 600; }
+.login-card h2 { margin: 22px 0 16px; font-family: "Cormorant Garamond", Georgia, serif; font-size: 24px; font-weight: 600; }
 .login-card label { display: block; font-size: 13px; font-weight: 500; color: var(--text-secondary); margin-bottom: 12px; }
 .login-card input { display: block; width: 100%; margin-top: 6px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; font: inherit; }
 .login-card input:focus, .composer textarea:focus { outline: 2px solid #f3cfdb; border-color: var(--accent); }
@@ -56,10 +58,10 @@ body { margin: 0; background: var(--bg); color: var(--text-primary);
 .side { background: var(--side); color: var(--side-text); padding: 20px 12px; position: sticky; top: 0; height: 100vh;
   display: flex; flex-direction: column; gap: 18px; border-right: 1px solid var(--border); }
 .brand { display: flex; gap: 10px; align-items: center; padding: 0 8px; }
-.brand .logo { width: 38px; height: 38px; border-radius: 12px; background: linear-gradient(135deg, #d7739a, #a8476b); color: #fff; font-family: Fraunces, Georgia, serif; display: grid; place-items: center;
+.brand .logo { width: 38px; height: 38px; border-radius: 12px; background: linear-gradient(135deg, #d7739a, #a8476b); color: #fff; font-family: "Cormorant Garamond", Georgia, serif; display: grid; place-items: center;
   font-weight: 700; letter-spacing: .02em; }
-.brand b { display: block; color: var(--text-primary); font-family: Fraunces, Georgia, serif; font-size: 17px; font-weight: 600; }
-.brand span { font-size: 11px; color: var(--side-text); }
+.brand b { display: block; color: var(--text-primary); font-family: "Cormorant Garamond", Georgia, serif; font-size: 17px; font-weight: 600; }
+.brand div > span { font-size: 11px; color: var(--side-text); }
 .side .tabs { flex-direction: column; border: 0; margin: 0; gap: 2px; overflow: visible; }
 .side .tabs button { display: flex; align-items: center; gap: 10px; color: var(--side-text); padding: 9px 12px; border-radius: 8px;
   border: 0; margin: 0; font-weight: 500; text-align: left; }
@@ -83,7 +85,7 @@ body { margin: 0; background: var(--bg); color: var(--text-primary);
 }
 .wrap { max-width: 1200px; margin: 0 auto; padding: 20px 16px 48px; }
 header { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-h1 { font-family: Fraunces, Georgia, serif; font-size: 28px; margin: 0; font-weight: 600; letter-spacing: -0.01em; color: var(--text-primary); }
+h1 { font-family: "Cormorant Garamond", Georgia, serif; font-size: 28px; margin: 0; font-weight: 600; letter-spacing: -0.01em; color: var(--text-primary); }
 .sub { color: var(--text-secondary); font-size: 13px; }
 .controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: #fff; box-shadow: 0 1px 2px rgb(120 60 80 / .06); }
@@ -106,7 +108,7 @@ h1 { font-family: Fraunces, Georgia, serif; font-size: 28px; margin: 0; font-wei
 .card h2 { font-size: 15px; font-weight: 600; margin: 0 0 2px; color: var(--text-primary); }
 .card .desc { color: var(--text-muted); font-size: 12px; margin-bottom: 10px; }
 .kpi .label { color: var(--text-muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
-.kpi .value { font-family: Fraunces, Georgia, serif; color: var(--accent-strong); font-size: clamp(24px, 2.4vw, 32px); overflow-wrap: anywhere; font-weight: 650; letter-spacing: -0.02em; margin-top: 2px; font-variant-numeric: tabular-nums; }
+.kpi .value { font-variant-numeric: lining-nums tabular-nums; font-family: "Cormorant Garamond", Georgia, serif; color: var(--accent-strong); font-size: clamp(24px, 2.4vw, 32px); overflow-wrap: anywhere; font-weight: 650; letter-spacing: -0.02em; margin-top: 2px; font-variant-numeric: tabular-nums; }
 .kpi .hint { color: var(--text-muted); font-size: 12px; }
 .status { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; color: var(--text-primary); }
 .two { grid-template-columns: 2fr 1fr; margin-bottom: 12px; }
@@ -194,13 +196,120 @@ th.sort::after { content: ' ↕'; color: var(--text-muted); font-size: 10px; }
   border-radius: 6px; padding: 4px 6px; font: inherit; font-size: 13px; max-width: 100%; }
 #cfg-gerentes { width: 100%; max-width: 420px; }
 .cfg td { vertical-align: middle; }
+
+/* ================= Tema beleza ================= */
+h1 { font-size: 36px; font-weight: 600; letter-spacing: 0; line-height: 1.1; }
+.sub { color: var(--text-secondary); }
+.side { background: linear-gradient(180deg, #3d2b27 0%, #2a1d1a 100%); color: var(--side-text); border-right: 0; padding: 26px 14px; }
+.side .brand { gap: 10px; padding: 0 4px 18px; border-bottom: 1px solid rgb(239 225 200 / .14); }
+.brand .logo { font-variant-numeric: lining-nums; width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg, #f3e3c7 0%, #c9a46a 55%, #a07a45 100%);
+  flex: none; color: #3b2a25; font-size: 22px; font-weight: 700; box-shadow: 0 0 0 3px rgb(239 225 200 / .18); }
+.side .brand b { white-space: nowrap; color: #fbf3e8; font-size: 19px; font-weight: 600; letter-spacing: .01em; }
+.side .brand div > span { white-space: nowrap; color: #c9a46a; letter-spacing: .14em; text-transform: uppercase; font-size: 10px; }
+.side .tabs { gap: 4px; }
+.side .tabs button { color: var(--side-text); padding: 11px 14px; border-radius: 12px; position: relative; letter-spacing: .01em; }
+.side .tabs button:hover { background: rgb(239 225 200 / .07); color: #fbf3e8; }
+.side .tabs button[aria-selected="true"] { background: rgb(239 225 200 / .12); color: var(--side-active); font-weight: 600; }
+.side .tabs button[aria-selected="true"]::before { content: ''; position: absolute; left: -14px; top: 10px; bottom: 10px; width: 3px; border-radius: 0 3px 3px 0; background: var(--gold); }
+.side-foot .pill { background: rgb(239 225 200 / .08); border-color: rgb(239 225 200 / .18); color: #f3e3c7; }
+.ia-selo { margin: 6px 4px 0; padding: 12px 14px; border-radius: 14px; background: rgb(239 225 200 / .07); border: 1px solid rgb(239 225 200 / .14);
+  font-size: 12px; line-height: 1.45; color: var(--side-text); }
+.ia-selo b { display: block; color: #f3e3c7; font-family: "Cormorant Garamond", Georgia, serif; font-size: 16px; font-weight: 600; margin-bottom: 2px; }
+.main { padding: 28px 36px 56px; }
+.main > header { background: color-mix(in srgb, var(--bg) 92%, transparent); backdrop-filter: blur(8px); border-bottom: 0; padding: 8px 0 18px; }
+.main > header::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 1px; background: linear-gradient(90deg, var(--gold), transparent 70%); opacity: .45; }
+.ola { font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--gold); font-weight: 600; margin-bottom: 4px; }
+.sec { color: var(--gold); letter-spacing: .18em; margin: 34px 0 14px; font-size: 11px; }
+.sec::after { background: linear-gradient(90deg, var(--line), transparent); }
+.card { border-radius: 22px; border-color: var(--border); box-shadow: var(--shadow); padding: 22px 24px; }
+.card h2 { font-family: "Cormorant Garamond", Georgia, serif; font-size: 22px; font-weight: 600; letter-spacing: .005em; }
+.card .desc { color: var(--text-muted); font-size: 12.5px; margin-bottom: 14px; }
+.kpi { position: relative; overflow: hidden; }
+.kpi::before { content: ''; position: absolute; inset: 0 0 auto 0; height: 3px; background: linear-gradient(90deg, var(--accent), var(--gold)); opacity: .75; }
+.kpi .label { color: var(--text-secondary); font-size: 10.5px; letter-spacing: .12em; font-weight: 600; }
+.kpi .value { font-variant-numeric: tabular-nums; font-family: Jost, system-ui, sans-serif; color: var(--cocoa); font-size: clamp(28px, 2.6vw, 36px); font-weight: 300; letter-spacing: 0; line-height: 1.1; margin: 6px 0 2px; }
+.kpi .hint { color: var(--text-muted); }
+.btn { border-radius: 999px; padding: 8px 18px; border-color: var(--line); background: var(--surface-1); box-shadow: none; letter-spacing: .01em; }
+.btn:hover { background: var(--surface-2); border-color: #cdb8a8; }
+.btn-primary { background: linear-gradient(135deg, #c27a8a, #94505f); border-color: transparent; color: #fff; box-shadow: 0 6px 16px rgb(148 80 95 / .25); }
+.btn-primary:hover { background: linear-gradient(135deg, #b5687a, #7d4350); border-color: transparent; }
+.btn-emerg { border-radius: 999px; background: transparent; color: #f2b8bd; border-color: rgb(242 184 189 / .4); }
+.btn-emerg:hover { background: rgb(185 71 79 / .15); border-color: #f2b8bd; }
+.btn-emerg[data-ligar] { color: #fff; background: var(--good); border-color: var(--good); }
+.seg { border-radius: 999px; border-color: var(--line); box-shadow: none; padding: 3px; gap: 2px; background: var(--surface-1); }
+.seg button { border-radius: 999px; padding: 6px 14px; }
+.seg button[aria-pressed="true"] { background: var(--cocoa); color: #fbf3e8; }
+.pill { border-radius: 999px; }
+.banner { border-radius: 14px; border-left-width: 3px; box-shadow: var(--shadow); }
+.aviso-pre { display: flex; gap: 14px; align-items: flex-start; padding: 16px 20px; border-radius: 20px; margin-bottom: 8px;
+  background: linear-gradient(120deg, #fbf0ee 0%, #f6ebdc 100%); border: 1px solid #ecd9c9; }
+.aviso-pre .ic-pre { flex: none; width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; background: #fffdfb; color: var(--accent-strong);
+  font-family: "Cormorant Garamond", Georgia, serif; font-size: 20px; box-shadow: var(--shadow); }
+.aviso-pre b { font-family: "Cormorant Garamond", Georgia, serif; font-size: 19px; font-weight: 600; color: var(--cocoa); display: block; line-height: 1.2; }
+.aviso-pre span { font-size: 13px; color: var(--text-secondary); }
+.pre-tag { display: inline-flex; align-items: center; gap: 4px; padding: 2px 10px; border-radius: 999px; font-size: 11.5px; font-weight: 600;
+  background: var(--accent-soft); color: var(--accent-strong); border: 1px solid #efd3d8; }
+.login { background: var(--bg); padding: 0; place-items: stretch; }
+.login-wrap { display: grid; grid-template-columns: 1.1fr 1fr; min-height: 100vh; }
+.login-art { position: relative; overflow: hidden; color: #fbf3e8; padding: 56px; display: flex; flex-direction: column; justify-content: space-between;
+  background: radial-gradient(700px 500px at 85% 15%, rgb(194 122 138 / .55), transparent 60%), radial-gradient(600px 500px at 10% 100%, rgb(201 164 106 / .35), transparent 60%), linear-gradient(160deg, #3d2b27, #241916); }
+.login-art h1 { color: #fbf3e8; font-size: clamp(38px, 4.4vw, 60px); font-weight: 500; line-height: 1.05; margin: 0 0 14px; }
+.login-art h1 i { color: #e9c99b; }
+.login-art p { max-width: 380px; color: #e6d6c8; font-size: 15px; margin: 0; }
+.login-art .brand b { color: #fbf3e8; font-size: 22px; }
+.login-art .brand div > span { color: #c9a46a; letter-spacing: .14em; text-transform: uppercase; font-size: 10px; }
+.login-side { display: grid; place-items: center; padding: 24px 16px; }
+.login-card { border-radius: 26px; padding: 40px 36px; box-shadow: var(--shadow); max-width: 410px; }
+.login-card h2 { font-size: 32px; margin: 0 0 6px; }
+.login-card .sub { margin-bottom: 22px; }
+.login-card input { border-radius: 12px; padding: 12px 14px; background: var(--surface-2); border-color: var(--border); }
+.login-card .btn { padding: 12px; margin-top: 10px; }
+@media (max-width: 860px) { .login-wrap { grid-template-columns: 1fr; } .login-art { padding: 32px 24px; min-height: 260px; } }
+.login-card input:focus, .composer textarea:focus { outline: 3px solid #f2dde1; border-color: var(--accent); }
+.composer textarea { border-radius: 16px; background: var(--surface-2); border-color: var(--border); padding: 11px 14px; }
+.chat { background: linear-gradient(180deg, #fbf6f1, #f7efe8); border-radius: 18px; padding: 14px; gap: 8px; }
+.bal { border-radius: 16px; padding: 8px 12px; font-size: 13.5px; box-shadow: 0 1px 1px rgb(91 58 46 / .05); }
+.bal.in { background: #fffdfb; border: 1px solid var(--border); border-bottom-left-radius: 4px; }
+.bal.out { background: #f6e3e6; border-bottom-right-radius: 4px; }
+.bal.out.humano { background: #f1e5cf; }
+.bal.sistema { background: transparent; box-shadow: none; }
+.cvitem { border-radius: 14px; padding: 12px; border-bottom-color: transparent; margin-bottom: 2px; }
+.cvitem:hover { background: var(--surface-2); }
+.cvitem[aria-current="true"] { background: var(--accent-soft); box-shadow: inset 3px 0 0 var(--accent); }
+.cvitem b { font-weight: 600; }
+.toolbar input, .toolbar select, .cfg input, .cfg select, #cfg-gerentes, #cv-busca { border-radius: 10px; border-color: var(--line); padding: 7px 10px; background: var(--surface-1); }
+th { text-transform: uppercase; letter-spacing: .08em; font-size: 10.5px; font-weight: 600; color: var(--text-muted); }
+.chip { border-radius: 16px; box-shadow: var(--shadow); }
+.chip b { font-variant-numeric: tabular-nums; font-family: Jost, system-ui, sans-serif; font-size: 24px; font-weight: 300; }
+.agwrap { border-radius: 20px; box-shadow: var(--shadow); }
+.ev { border-radius: 10px; }
+.ev .ia { background: var(--accent); border-radius: 999px; padding: 0 6px; }
+.bar { background: linear-gradient(90deg, var(--accent), #d39aa6); }
+.tip { border-radius: 12px; }
+@media (max-width: 900px) {
+  .side { padding: 14px 12px; }
+  .side .brand { border-bottom: 0; padding-bottom: 0; }
+  .side .tabs button[aria-selected="true"]::before { display: none; }
+  .ia-selo { display: none; }
+  .main { padding: 16px 16px 40px; }
+  h1 { font-size: 30px; }
+}
 </style>
 </head>
 <body>
 <div id="login" class="login" hidden>
+ <div class="login-wrap">
+  <div class="login-art">
+    <div class="brand"><span class="logo">K</span><div><b>Cabelos by Karol</b><span>Atendimento &amp; Beleza</span></div></div>
+    <div>
+      <h1>Cada cliente,<br>um cuidado <i>especial</i>.</h1>
+      <p>O painel da recepção: conversas do WhatsApp, pré-agendamentos feitos pela assistente virtual e a agenda do salão em um só lugar.</p>
+    </div>
+  </div>
+  <div class="login-side">
   <div class="login-card">
-    <div class="brand"><span class="logo">CK</span><div><b>Cabelos by Karol</b><span>CRM de atendimento</span></div></div>
-    <h2>Entrar no painel</h2>
+    <h2>Bem-vinda de volta</h2>
+    <div class="sub">Entre com seu e-mail e senha.</div>
     <form id="f-login">
       <label>E-mail<input id="email" type="email" required autocomplete="email"></label>
       <label>Senha<input id="senha" type="password" required autocomplete="current-password"></label>
@@ -208,11 +317,13 @@ th.sort::after { content: ' ↕'; color: var(--text-muted); font-size: 10px; }
     </form>
     <div class="msg" id="login-msg"></div>
   </div>
+  </div>
+ </div>
 </div>
 
 <div class="shell" id="app" hidden>
   <aside class="side">
-    <div class="brand"><span class="logo">CK</span><div><b>Cabelos by Karol</b><span>CRM · Atendimento IA</span></div></div>
+    <div class="brand"><span class="logo">K</span><div><b>Cabelos by Karol</b><span>Atendimento &amp; Beleza</span></div></div>
     <nav class="tabs" role="tablist" aria-label="Seções">
       <button role="tab" data-tab="atendimento" aria-selected="true"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v10H8l-4 4z"/></svg><span>Visão geral</span></button>
       <button role="tab" data-tab="conversas" aria-selected="false"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h12v8H7l-4 3zM9 17h8l4 3V9h-3"/></svg><span>Conversas</span></button>
@@ -222,6 +333,7 @@ th.sort::after { content: ' ↕'; color: var(--text-muted); font-size: 10px; }
       <button role="tab" data-tab="config" aria-selected="false"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/></svg><span>Configurações</span></button>
     </nav>
     <div class="side-foot">
+      <div class="ia-selo"><b>Assistente virtual</b>Atende no WhatsApp e faz só <u>pré-agendamentos</u>. Quem confirma o horário é sempre a equipe.</div>
       <span class="pill" id="pill-bot"></span>
       <button class="btn btn-emerg" id="emergencia" hidden></button>
     </div>
@@ -229,6 +341,7 @@ th.sort::after { content: ' ↕'; color: var(--text-muted); font-size: 10px; }
   <main class="main">
   <header>
     <div>
+      <div class="ola" id="ola">Cabelos by Karol</div>
       <h1 id="titulo">Visão geral</h1>
       <div class="sub" id="sub">Carregando…</div>
     </div>
@@ -242,14 +355,16 @@ th.sort::after { content: ' ↕'; color: var(--text-muted); font-size: 10px; }
   </header>
   <div id="banner"></div>
   <div id="tab-atendimento">
+  <div class="aviso-pre"><span class="ic-pre">✦</span><div><b>A assistente virtual faz apenas pré-agendamentos</b>
+    <span>Ela anota o pedido da cliente e reserva no Belasis como <b style="display:inline;font:inherit;font-weight:600">não confirmado</b>. A equipe confere, confirma com a cliente e só então vira agendamento.</span></div></div>
   <section id="alertas"></section>
   <h3 class="sec">Resumo do período</h3>
   <section class="grid kpis" id="kpis"></section>
-  <h3 class="sec">Funil de agendamento</h3>
+  <h3 class="sec">Funil do pré-agendamento</h3>
 
   <section class="card" style="margin-bottom:12px">
     <h2>Funil do período</h2>
-    <div class="desc">Da conversa no WhatsApp até a confirmação da equipe no Belasis.</div>
+    <div class="desc">Da conversa no WhatsApp ao pré-agendamento da assistente e à confirmação feita pela equipe no Belasis.</div>
     <div id="funil"></div>
   </section>
 
@@ -257,7 +372,7 @@ th.sort::after { content: ' ↕'; color: var(--text-muted); font-size: 10px; }
   <section class="grid two">
     <div class="card">
       <h2>Volume por dia</h2>
-      <div class="desc">Conversas com mensagem da cliente, transferências para a equipe e agendamentos feitos pelo agente.</div>
+      <div class="desc">Conversas com mensagem da cliente, transferências para a equipe e pré-agendamentos feitos pela assistente.</div>
       <div class="legend" id="legend-serie"></div>
       <div id="chart-serie"></div>
       <details><summary>Ver como tabela</summary><div class="tablewrap" id="table-serie"></div></details>
@@ -273,7 +388,7 @@ th.sort::after { content: ' ↕'; color: var(--text-muted); font-size: 10px; }
   <section class="grid half">
     <div class="card">
       <h2>Agora com a equipe</h2>
-      <div class="desc">Conversas pausadas para humano. O agente reassume quando o tempo acaba.</div>
+      <div class="desc">Conversas com a equipe. Transferidas pela assistente só voltam quando alguém clicar em "Devolver ao agente".</div>
       <div class="tablewrap" id="table-agora"></div>
     </div>
     <div class="card">
@@ -330,7 +445,7 @@ th.sort::after { content: ' ↕'; color: var(--text-muted); font-size: 10px; }
     </section>
     <section class="card" style="margin-bottom:12px">
       <h2>Função das profissionais</h2>
-      <div class="desc">Define quem entra na lista da vez. "Recepção / interno" nunca recebe agendamento do agente. Salva ao trocar.</div>
+      <div class="desc">Define quem entra na lista da vez. "Recepção / interno" nunca recebe pré-agendamento da assistente. Salva ao trocar.</div>
       <div class="tablewrap" id="cfg-prof"></div>
     </section>
     <section class="card">
@@ -389,7 +504,7 @@ th.sort::after { content: ' ↕'; color: var(--text-muted); font-size: 10px; }
     <section class="grid kpis" id="b-kpis"></section>
     <section class="card" style="margin-bottom:12px">
       <h2>Agendamentos por dia</h2>
-      <div class="desc">Agendamentos ativos no Belasis (sem cancelados). Barras claras são os próximos dias já marcados.</div>
+      <div class="desc">Agenda do salão no Belasis, feita e confirmada pela equipe (sem cancelados). Barras claras são os próximos dias já marcados.</div>
       <div id="b-dias"></div>
     </section>
     <section class="grid half">
@@ -398,7 +513,7 @@ th.sort::after { content: ' ↕'; color: var(--text-muted); font-size: 10px; }
     </section>
     <section class="grid half">
       <div class="card"><h2>Agenda ocupada nos próximos dias</h2><div class="desc">% do tempo de trabalho de cada profissional já agendado nos próximos 7 dias. Folgas não entram na conta.</div><div id="b-ocup"></div></div>
-      <div class="card"><h2>Pré-agendamentos do agente</h2><div class="desc">Pedidos feitos pelo WhatsApp. Entram sozinhos no Belasis como não confirmados; a equipe confere e confirma.</div><div class="tablewrap" id="b-pre"></div></div>
+      <div class="card"><h2>Pré-agendamentos da assistente</h2><div class="desc">Pedidos feitos pelo WhatsApp. Entram no Belasis como não confirmados; a equipe confere e confirma com a cliente.</div><div class="tablewrap" id="b-pre"></div></div>
     </section>
   </section>
   </main>
@@ -426,7 +541,7 @@ const DIAS = ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
 const SERIES = [
   { key: 'conversas', label: 'Conversas', color: 'var(--series-1)' },
   { key: 'transferencias', label: 'Transferências', color: 'var(--series-2)' },
-  { key: 'agendamentos', label: 'Agendamentos', color: 'var(--series-3)' },
+  { key: 'agendamentos', label: 'Pré-agendamentos', color: 'var(--series-3)' },
 ];
 const statusTag = (level, text) => {
   const icon = { good: '✓', warning: '!', serious: '!', critical: '✕' }[level];
@@ -442,7 +557,7 @@ function renderKpis(d) {
   const tiles = [
     { label: 'Conversas', value: fmt.format(k.conversas), hint: `${fmt.format(k.msgs_clientes)} mensagens de clientes` },
     { label: 'Resolvidas só pelo agente', value: pct(k.resolvidas_pelo_agente, k.conversas), hint: `${fmt.format(k.resolvidas_pelo_agente)} sem equipe` },
-    { label: 'Agendamentos pelo agente', value: fmt.format(k.agendamentos), hint: `${k.remarcacoes} remarcações · ${k.cancelamentos} cancelamentos` },
+    { label: 'Pré-agendamentos da assistente', value: fmt.format(k.agendamentos), hint: `${k.remarcacoes} pedidos de remarcação · ${k.cancelamentos} cancelamentos` },
     { label: 'Transferências', value: fmt.format(k.transferencias), hint: `${fmt.format(k.retomadas)} vezes o agente reassumiu` },
     { label: `Equipe respondeu em até ${d.minutos_retorno} min`, value: noPrazo == null ? '—' : Math.round(noPrazo * 100) + '%',
       hint: k.tempo_resposta_humana_mediana_min == null ? 'sem respostas no período' : `mediana ${k.tempo_resposta_humana_mediana_min} min`,
@@ -459,7 +574,7 @@ function renderKpis(d) {
       hint: k.latencia_agente_p95_ms == null ? 'mediana' : `mediana · 95% abaixo de ${(k.latencia_agente_p95_ms / 1000).toFixed(1)} s` },
     { label: 'Erros de sistema', value: fmt.format(k.erros_sistema), hint: `${k.erros_belasis} erros na API Belasis`,
       status: (k.erros_sistema + k.erros_belasis) ? ['serious', 'Verificar'] : ['good', 'Sem erros'] },
-    { label: 'Agendamento sem confirmação', value: fmt.format(k.escritas_sem_confirmacao), hint: 'deve ser sempre zero',
+    { label: 'Pré-agendamento lançado confirmado', value: fmt.format(k.escritas_sem_confirmacao), hint: 'deve ser sempre zero: a assistente nunca confirma',
       status: k.escritas_sem_confirmacao ? ['critical', 'Investigar'] : ['good', 'OK'] },
     { label: 'Uso de IA (tokens)', value: fmt.format(k.tokens_in + k.tokens_out), hint: `${fmt.format(k.tokens_in)} entrada · ${fmt.format(k.tokens_out)} saída` },
   ];
@@ -668,7 +783,7 @@ async function carregarExtras() {
   const f = fu.data;
   if (!f) { $('#funil').innerHTML = `<div class="empty">${esc(fu.error?.message || 'Sem dados.')}</div>`; return; }
   const etapas = [['Conversas com clientes', f.conversas], ['Com pré-agendamento', f.com_pre_agendamento],
-                  ['Comandas no Belasis', f.comandas_no_belasis], ['Confirmadas pela equipe', f.confirmadas]];
+                  ['Pré-agendamentos no Belasis', f.comandas_no_belasis], ['Confirmados pela equipe', f.confirmadas]];
   const max = Math.max(1, ...etapas.map(e => e[1]));
   $('#funil').innerHTML = etapas.map(([l, v], i) => `<div class="fn"><div class="fn-l">${esc(l)}</div><div class="fn-b"><div class="bar" style="width:${Math.max(1, 100 * v / max)}%"></div></div>
       <div class="fn-v">${fmt.format(v)}${i ? ` <span class="sub">${pct(v, etapas[i - 1][1])}</span>` : ''}</div></div>`).join('')
@@ -695,7 +810,7 @@ async function carregarConversas() {
   $('#cv-lista').innerHTML = !lista.length ? '<div class="empty">Nenhuma conversa.</div>' : lista.map(c => `<button class="cvitem" data-id="${esc(c.id)}" aria-current="${c.id === cv.sel}">
       <div style="display:flex;justify-content:space-between;gap:8px"><b>${esc(c.nome)}</b><span class="sub">${hora(c.ultima_msg_em)}</span></div>
       <div class="sub clip">${c.ultimo_autor ? esc(AUTOR[c.ultimo_autor] || c.ultimo_autor) + ': ' : ''}${esc(c.ultimo_texto || '')}</div>
-      <div style="margin-top:4px">${tagStatus(c)}${c.pre_agendamentos ? ` <span class="pill">${c.pre_agendamentos} agendado(s)</span>` : ''}</div></button>`).join('');
+      <div style="margin-top:4px">${tagStatus(c)}${c.pre_agendamentos ? ` <span class="pre-tag">✦ ${c.pre_agendamentos} pré-agendado${c.pre_agendamentos > 1 ? 's' : ''}</span>` : ''}</div></button>`).join('');
   document.querySelectorAll('.cvitem').forEach(b => b.addEventListener('click', () => abrirConversa(b.dataset.id)));
   if (cv.sel) abrirConversa(cv.sel, true);
 }
@@ -724,7 +839,7 @@ async function abrirConversa(id, silencioso) {
     <div class="chat" id="cv-chat">${c.mensagens.map(m => `<div class="bal ${m.autor === 'cliente' ? 'in' : m.autor === 'sistema' ? 'sistema' : 'out ' + esc(m.autor)}">${esc(m.texto || '[' + m.tipo + ']')}<small>${esc(AUTOR[m.autor] || m.autor)} · ${hora(m.em)}</small></div>`).join('') || '<div class="empty">Sem mensagens.</div>'}</div>
     <form class="composer" id="cv-form"><textarea id="cv-texto" rows="2" maxlength="4000" placeholder="Escreva para a cliente… (Enter envia, Shift+Enter pula linha)" aria-label="Mensagem para a cliente"></textarea><button class="btn btn-primary" type="submit">Enviar</button></form>
     <div class="sub" id="cv-env-msg">Sai pelo WhatsApp do salão. O agente pausa nesta conversa e volta depois de 5 min sem resposta da equipe.</div>
-    ${c.pre_agendamentos.length ? `<details><summary>Agendamentos pelo WhatsApp (${c.pre_agendamentos.length})</summary><table><tr><th>Serviço</th><th>Quando</th><th>Situação</th></tr>${c.pre_agendamentos.map(p => `<tr><td>${esc(p.servico)}<div class="sub">${esc(p.profissional || '')}</div></td><td>${ddmm(p.data)} ${esc(p.hora)}</td><td>${esc(p.escrita || p.estado)}</td></tr>`).join('')}</table></details>` : ''}`;
+    ${c.pre_agendamentos.length ? `<details><summary>Pré-agendamentos da assistente (${c.pre_agendamentos.length}) · a equipe confirma</summary><table><tr><th>Serviço</th><th>Quando</th><th>Situação</th></tr>${c.pre_agendamentos.map(p => `<tr><td>${esc(p.servico)}<div class="sub">${esc(p.profissional || '')}</div></td><td>${ddmm(p.data)} ${esc(p.hora)}</td><td>${esc(p.escrita || p.estado)}</td></tr>`).join('')}</table></details>` : ''}`;
   const chat = $('#cv-chat'); if (noFim || !silencioso) chat.scrollTop = chat.scrollHeight;
   cv.rascunhoDe = id; if (rascunho) $('#cv-texto').value = rascunho;
   if (focado) { const t = $('#cv-texto'); t.focus(); t.setSelectionRange(cursor, cursor); }
@@ -946,7 +1061,7 @@ function renderGrade(d) {
   $('#ag-view').innerHTML = `<div class="agwrap">${html}</div></div>`;
   $('#ag-view').querySelectorAll('.ev').forEach(el => {
     const e = JSON.parse(el.dataset.ev);
-    const t = `<b>${esc(e.cliente)}</b>${esc(e.servico)}<br>${esc(e.inicio)}–${esc(e.fim)} · ${esc(e.profissional)}<br>${esc(ST[e.status] || e.status)}${e.preco ? ' · ' + brl(e.preco) : ''}${e.ia ? '<br>Agendado pelo WhatsApp (IA)' : ''}`;
+    const t = `<b>${esc(e.cliente)}</b>${esc(e.servico)}<br>${esc(e.inicio)}–${esc(e.fim)} · ${esc(e.profissional)}<br>${esc(ST[e.status] || e.status)}${e.preco ? ' · ' + brl(e.preco) : ''}${e.ia ? '<br>Veio de pré-agendamento da assistente (WhatsApp)' : ''}`;
     el.addEventListener('pointermove', (ev) => showTip(ev, t)); el.addEventListener('pointerleave', hideTip);
     el.addEventListener('click', (ev) => showTip(ev, t));
   });
@@ -1002,7 +1117,7 @@ function renderRanking() {
     ['Ticket médio', brl(s.ticket_medio), 'por atendimento'],
     ['Clientes atendidas', fmt.format(s.clientes || 0), 'diferentes no período'],
     ['Cancelados ou faltas', fmt.format(s.cancelados || 0), s.atendimentos ? Math.round(100 * s.cancelados / (s.atendimentos + s.cancelados)) + '% dos agendamentos' : ''],
-    ['Pelo WhatsApp (IA)', fmt.format(s.pelo_whatsapp || 0), 'agendamentos lançados pelo agente'],
+    ['Pré-agendados pela assistente', fmt.format(s.pelo_whatsapp || 0), 'pedidos do WhatsApp que a equipe confirmou'],
   ];
   $('#rk-kpis').innerHTML = tiles.map(([l, v, h]) => `<div class="card kpi"><div class="label">${l}</div><div class="value">${v}</div><div class="hint">${esc(h)}</div></div>`).join('');
   tabela($('#rk-prof'), 'prof', [{ t: 'Profissional', k: 'nome' }, { t: 'Faturamento', k: 'faturamento', num: 1, f: brl }, { t: 'Atendimentos', k: 'atendimentos', num: 1 },
