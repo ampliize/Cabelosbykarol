@@ -682,6 +682,7 @@ const AUTOR = { cliente: 'Cliente', bot: 'Agente', humano: 'Equipe', sistema: 'M
 const tagStatus = (c) => c.bot_desativado ? statusTag('critical', 'Sem agente (não quer IA)')
   : c.status === 'bot' ? statusTag('good', 'Agente atendendo')
   : c.status === 'aguardando_humano' ? statusTag('critical', 'Aguardando equipe')
+  : (c.handoff || (c.handoffs || []).some(h => !h.resolvido_em)) ? statusTag('warning', 'Equipe atendendo · transferida')
   : statusTag('warning', 'Equipe atendendo' + (c.pausado_ate ? ` · agente volta em ${minutosAte(c.pausado_ate)} min` : ''));
 async function carregarConversas() {
   if (DEMO) { $('#cv-lista').innerHTML = '<div class="empty">Indisponível no modo demonstração.</div>'; return; }
@@ -716,7 +717,9 @@ async function abrirConversa(id, silencioso) {
   $('#cv-det').innerHTML = `<div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:center">
       <div><h2>${esc(c.nome)}</h2><div class="sub"><a href="https://wa.me/${esc(c.telefone)}" target="_blank" rel="noopener">wa.me/${esc(c.telefone)}</a> · ${tagStatus(c)}</div></div>
       <div class="controls">${c.status === 'bot' && !c.bot_desativado ? '<button class="btn" id="cv-assumir">Assumir conversa</button>' : '<button class="btn" id="cv-devolver">Devolver ao agente</button>'}</div></div>
-    <div class="desc" style="margin-top:6px">Quando a equipe responde pelo WhatsApp do salão, o agente pausa sozinho e só volta depois de 5 min sem resposta da equipe.</div>
+    <div class="desc" style="margin-top:6px">${c.handoffs.some(h => !h.resolvido_em)
+      ? 'Conversa transferida pelo agente: ela fica com a equipe e o agente só volta quando alguém clicar em <b>Devolver ao agente</b>.'
+      : 'Quando a equipe responde pelo WhatsApp do salão, o agente pausa sozinho e só volta depois de 5 min sem resposta da equipe.'}</div>
     ${c.handoffs.filter(h => !h.resolvido_em).map(h => `<div class="banner">Transferida: <b>${esc(MOTIVOS[h.motivo] || h.motivo)}</b>${h.resumo ? ' · ' + esc(h.resumo) : ''}</div>`).join('')}
     <div class="chat" id="cv-chat">${c.mensagens.map(m => `<div class="bal ${m.autor === 'cliente' ? 'in' : m.autor === 'sistema' ? 'sistema' : 'out ' + esc(m.autor)}">${esc(m.texto || '[' + m.tipo + ']')}<small>${esc(AUTOR[m.autor] || m.autor)} · ${hora(m.em)}</small></div>`).join('') || '<div class="empty">Sem mensagens.</div>'}</div>
     <form class="composer" id="cv-form"><textarea id="cv-texto" rows="2" maxlength="4000" placeholder="Escreva para a cliente… (Enter envia, Shift+Enter pula linha)" aria-label="Mensagem para a cliente"></textarea><button class="btn btn-primary" type="submit">Enviar</button></form>
