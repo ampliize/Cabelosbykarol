@@ -237,7 +237,7 @@ h1 { font-size: 36px; font-weight: 600; letter-spacing: 0; line-height: 1.1; }
 .btn-emerg:hover { background: rgb(185 71 79 / .15); border-color: #f2b8bd; }
 .btn-emerg[data-ligar] { color: #fff; background: var(--good); border-color: var(--good); }
 .seg { border-radius: 999px; border-color: var(--line); box-shadow: none; padding: 3px; gap: 2px; background: var(--surface-1); }
-.seg button { border-radius: 999px; padding: 6px 14px; }
+.seg button { border-radius: 999px; padding: 6px 14px; white-space: nowrap; flex: none; }
 .seg button[aria-pressed="true"] { background: var(--cocoa); color: #fbf3e8; }
 .pill { border-radius: 999px; }
 .banner { border-radius: 14px; border-left-width: 3px; box-shadow: var(--shadow); }
@@ -286,6 +286,34 @@ th { text-transform: uppercase; letter-spacing: .08em; font-size: 10.5px; font-w
 .ev .ia { background: var(--accent); border-radius: 999px; padding: 0 6px; }
 .bar { background: linear-gradient(90deg, var(--accent), #d39aa6); }
 .tip { border-radius: 12px; }
+.so-mobile { display: none; }
+@media (min-width: 600px) and (max-width: 999px) {
+  #kpis, #b-kpis, #rk-kpis { grid-template-columns: repeat(3, 1fr); }
+  #ops { grid-template-columns: repeat(2, 1fr); }
+}
+.kpi .value { overflow-wrap: normal; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 599px) {
+  .chips { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .chip { min-width: 0; }
+}
+@media (max-width: 860px) {
+  .so-mobile { display: inline-flex; margin: 0 0 10px; }
+  #cv-det { scroll-margin-top: 12px; }
+  .cvlist { max-height: 60vh; }
+}
+@media (max-width: 640px) {
+  table.cfg, table.stack, table.cfg tbody, table.stack tbody { display: block; width: 100%; }
+  table.cfg tr:first-child, table.stack tr:first-child { display: none; }
+  table.cfg tr, table.stack tr { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 12px; padding: 14px 0; border-bottom: 1px solid var(--border); }
+  table.cfg td, table.stack td { display: block; border: 0; padding: 0; min-width: 0; }
+  table.cfg td[data-label]::before, table.stack td[data-label]::before { content: attr(data-label); display: block; font-size: 10px; font-weight: 600;
+    letter-spacing: .1em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; }
+  table.cfg td:first-child, table.stack td:first-child { grid-column: 1 / -1; }
+  table.cfg td:last-child:not([data-label]) { grid-column: 1 / -1; }
+  table.cfg input:not([type=checkbox]), table.cfg select { width: 100% !important; }
+  table.cfg .btn-mini { margin: 0; width: 100%; padding: 8px; }
+  .main > header .controls { width: 100%; }
+}
 @media (max-width: 900px) {
   .side { padding: 14px 12px; }
   .side .brand { border-bottom: 0; padding-bottom: 0; }
@@ -522,6 +550,11 @@ th { text-transform: uppercase; letter-spacing: .08em; font-size: 10.5px; font-w
 
 <script>
 const $ = (s) => document.querySelector(s);
+// no celular as tabelas de edição viram cartões: cada célula ganha o nome da coluna
+new MutationObserver(() => document.querySelectorAll('table.cfg:not([data-rot]), table.stack:not([data-rot])').forEach(t => {
+  t.dataset.rot = 1; const cab = [...(t.querySelector('tr')?.children || [])].map(th => th.textContent.trim());
+  t.querySelectorAll('tr').forEach((tr, i) => { if (!i) return; [...tr.children].forEach((td, j) => { if (cab[j]) td.dataset.label = cab[j]; }); });
+})).observe(document.documentElement, { childList: true, subtree: true });
 const fmt = new Intl.NumberFormat('pt-BR');
 const pct = (a, b) => b ? Math.round(100 * a / b) + '%' : '—';
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -767,7 +800,7 @@ function mostrarAba(t) {
   $('#tab-config').hidden = t !== 'config';
   $('#tab-ranking').hidden = t !== 'ranking';
   $('#belasis').hidden = t !== 'salao' || !ultimoB;
-  document.querySelector('.seg[aria-label="Período"]').style.visibility = (t === 'atendimento' || t === 'salao') ? 'visible' : 'hidden';
+  document.querySelector('.seg[aria-label="Período"]').style.display = (t === 'atendimento' || t === 'salao') ? '' : 'none';
   if (t === 'agenda') carregarAgenda(); else if (t === 'ranking') carregarRanking(); else if (t === 'salao' && ultimoB) renderBelasis(ultimoB);
   else if (t === 'conversas') carregarConversas(); else if (t === 'config') carregarConfig();
 }
@@ -817,7 +850,8 @@ async function carregarConversas() {
 async function abrirConversa(id, silencioso) {
   cv.sel = id;
   document.querySelectorAll('.cvitem').forEach(b => b.setAttribute('aria-current', b.dataset.id === id));
-  if (!silencioso) $('#cv-det').innerHTML = '<div class="empty">Carregando…</div>';
+  if (!silencioso) { $('#cv-det').innerHTML = '<div class="empty">Carregando…</div>';
+    if (matchMedia('(max-width: 860px)').matches) $('#cv-det').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
   const { data: c, error } = await sb.rpc('painel_conversa', { p_id: id });
   if (error || !c) { if (!silencioso) $('#cv-det').innerHTML = `<div class="empty">Não consegui abrir. ${esc(error?.message || '')}</div>`; return; }
   if (cv.sel !== id) return;
@@ -830,7 +864,7 @@ async function abrirConversa(id, silencioso) {
   const antigo = $('#cv-chat'), noFim = !antigo || antigo.scrollTop + antigo.clientHeight >= antigo.scrollHeight - 20;
   const rascunho = cv.rascunhoDe === id ? ($('#cv-texto')?.value || '') : '';
   $('#cv-det').innerHTML = `<div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:center">
-      <div><h2>${esc(c.nome)}</h2><div class="sub"><a href="https://wa.me/${esc(c.telefone)}" target="_blank" rel="noopener">wa.me/${esc(c.telefone)}</a> · ${tagStatus(c)}</div></div>
+      <div><button class="btn btn-mini so-mobile" type="button" onclick="document.getElementById('cv-lista').scrollIntoView({ behavior: 'smooth', block: 'start' })">← Voltar à lista</button><h2>${esc(c.nome)}</h2><div class="sub"><a href="https://wa.me/${esc(c.telefone)}" target="_blank" rel="noopener">wa.me/${esc(c.telefone)}</a> · ${tagStatus(c)}</div></div>
       <div class="controls">${c.status === 'bot' && !c.bot_desativado ? '<button class="btn" id="cv-assumir">Assumir conversa</button>' : '<button class="btn" id="cv-devolver">Devolver ao agente</button>'}</div></div>
     <div class="desc" style="margin-top:6px">${c.handoffs.some(h => !h.resolvido_em)
       ? 'Conversa transferida pelo agente: ela fica com a equipe e o agente só volta quando alguém clicar em <b>Devolver ao agente</b>.'
@@ -839,7 +873,7 @@ async function abrirConversa(id, silencioso) {
     <div class="chat" id="cv-chat">${c.mensagens.map(m => `<div class="bal ${m.autor === 'cliente' ? 'in' : m.autor === 'sistema' ? 'sistema' : 'out ' + esc(m.autor)}">${esc(m.texto || '[' + m.tipo + ']')}<small>${esc(AUTOR[m.autor] || m.autor)} · ${hora(m.em)}</small></div>`).join('') || '<div class="empty">Sem mensagens.</div>'}</div>
     <form class="composer" id="cv-form"><textarea id="cv-texto" rows="2" maxlength="4000" placeholder="Escreva para a cliente… (Enter envia, Shift+Enter pula linha)" aria-label="Mensagem para a cliente"></textarea><button class="btn btn-primary" type="submit">Enviar</button></form>
     <div class="sub" id="cv-env-msg">Sai pelo WhatsApp do salão. O agente pausa nesta conversa e volta depois de 5 min sem resposta da equipe.</div>
-    ${c.pre_agendamentos.length ? `<details><summary>Pré-agendamentos da assistente (${c.pre_agendamentos.length}) · a equipe confirma</summary><table><tr><th>Serviço</th><th>Quando</th><th>Situação</th></tr>${c.pre_agendamentos.map(p => `<tr><td>${esc(p.servico)}<div class="sub">${esc(p.profissional || '')}</div></td><td>${ddmm(p.data)} ${esc(p.hora)}</td><td>${esc(p.escrita || p.estado)}</td></tr>`).join('')}</table></details>` : ''}`;
+    ${c.pre_agendamentos.length ? `<details><summary>Pré-agendamentos da assistente (${c.pre_agendamentos.length}) · a equipe confirma</summary><table class="stack"><tr><th>Serviço</th><th>Quando</th><th>Situação</th></tr>${c.pre_agendamentos.map(p => `<tr><td>${esc(p.servico)}<div class="sub">${esc(p.profissional || '')}</div></td><td>${ddmm(p.data)} ${esc(p.hora)}</td><td>${esc(p.escrita || p.estado)}</td></tr>`).join('')}</table></details>` : ''}`;
   const chat = $('#cv-chat'); if (noFim || !silencioso) chat.scrollTop = chat.scrollHeight;
   cv.rascunhoDe = id; if (rascunho) $('#cv-texto').value = rascunho;
   if (focado) { const t = $('#cv-texto'); t.focus(); t.setSelectionRange(cursor, cursor); }
@@ -1022,7 +1056,7 @@ function renderAgenda() {
     + ` · sincronizado com o Belasis às ${hora(d.sincronizado_em).split(' ').pop()} · atualiza sozinho a cada minuto`;
   $('#ag-chips').innerHTML = [
     [grupos.size, 'agendamentos'], [conta('confirmed'), 'confirmados'], [conta('unconfirmed'), 'não confirmados'],
-    [conta('disconfirm'), 'cancelados ou faltas'], [ia, 'pelo WhatsApp (IA)'], [brl(fat), 'valor de tabela'],
+    [conta('disconfirm'), 'cancelados ou faltas'], [ia, 'vieram de pré-agendamento'], [brl(fat), 'valor de tabela'],
   ].map(([v, l]) => `<div class="chip"><b>${typeof v === 'number' ? fmt.format(v) : v}</b><span>${l}</span></div>`).join('');
   if (!itens.length) { $('#ag-view').innerHTML = '<div class="card empty">Nenhum agendamento com esses filtros.</div>'; return; }
   ag.vis === 'grade' ? renderGrade(d) : renderLista(itens);
